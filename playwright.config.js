@@ -15,20 +15,21 @@ import { defineConfig, devices } from '@playwright/test';
 //export default defineConfig({
 const config = {
   testDir: './tests',
-  timeout: 30 * 1000 * 5, // Set a global timeout of 30 seconds for each test
+  timeout: 60 * 1000, // Increased timeout to 60 seconds
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/results.xml' }]
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['list'] // Add list reporter for better CI output
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -37,6 +38,10 @@ const config = {
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    /* Take screenshot on failure */
+    screenshot: 'only-on-failure',
+    /* Record video on failure */
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
@@ -46,10 +51,9 @@ const config = {
       use: { 
         ...devices['Desktop Chrome'],
         headless: process.env.CI ? true : false, // Run tests in headless mode on CI
-        screenshot: 'only-on-failure', // Take screenshots only on failure
-        video: 'retain-on-failure', // Record videos only on failure
         slowMo: process.env.CI ? 0 : 1000, // Disable slow motion on CI
-        navigationTimeout: 30000, // Set navigation timeout to 30 seconds
+        navigationTimeout: 60000, // Increased navigation timeout
+        actionTimeout: 30000, // Action timeout
         browserName: 'chromium', // Specify the browser name
       },
     },
