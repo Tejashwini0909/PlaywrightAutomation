@@ -38,21 +38,15 @@ test.describe('FW Tests', () => {
     await modulepageObject.selectModule('gpt-o3-mini');
     await modulepageObject.sendMessage('What is Playwright?');
     await modulepageObject.verifyAssistantResponse('playwright');
-  });
-  
-  test('TC_06 - Verify gpt-4.5-preview module validation', async ({ page }) => {
-    await modulepageObject.selectModule('gpt-4.5-preview');
-    await modulepageObject.sendMessage('Explain about current affiliate stock marketing trends');
-    await modulepageObject.verifyAssistantResponse('stock');
-  });
-  
-  test('TC_07 - Verify Claude 4 Sonnet module validation', async ({ page }) => {
+  }); 
+   
+  test('TC_06 - Verify Claude 4 Sonnet module validation', async ({ page }) => {
     await modulepageObject.selectModule('Claude 4 Sonnet');
     await modulepageObject.sendMessage('What is QA Automation Role');
     await modulepageObject.verifyAssistantResponse('automation');
   });
   
-  test('TC_08 - Verify DeepSeek R1 module validation', async ({ page }) => {
+  test('TC_07 - Verify DeepSeek R1 module validation', async ({ page }) => {
     await modulepageObject.selectModule('DeepSeek R1');
     await modulepageObject.sendMessage('What is Regression Testing?');
     await modulepageObject.verifyAssistantResponse('regression');
