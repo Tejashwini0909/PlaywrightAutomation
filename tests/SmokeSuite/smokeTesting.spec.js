@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ModulePages } from '../pages/modulePages';
+import { ModulePages } from '../../pages/modulePages.js';
 
 test.describe('FW Tests', () => {
   let modulepageObject;
