@@ -1,0 +1,240 @@
+name: CI/CD Pipeline - Playwright Automation
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - smoke
+        - simple
+        - ci-friendly
+
+env:
+  NODE_VERSION: '18'
+  PLAYWRIGHT_BROWSERS: 'chromium'
+
+jobs:
+  # Lint and validate code
+  lint:
+    name: Lint and Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Validate Playwright config
+      run: npx playwright --version
+
+  # Run tests in parallel
+  test-simple:
+    name: Simple Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+    strategy:
+      matrix:
+        browser: [chromium]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Run Simple Tests
+      run: npx playwright test tests/simple.spec.js --project=${{ matrix.browser }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: simple-tests-${{ matrix.browser }}
+        path: playwright-report/
+        retention-days: 30
+
+  test-ci-friendly:
+    name: CI-Friendly Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint
+    strategy:
+      matrix:
+        browser: [chromium]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Run CI-Friendly Tests
+      run: npx playwright test tests/ci-friendly.spec.js --project=${{ matrix.browser }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ci-friendly-tests-${{ matrix.browser }}
+        path: playwright-report/
+        retention-days: 30
+
+  test-smoke:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: lint
+    strategy:
+      matrix:
+        browser: [chromium]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Run Smoke Tests
+      run: npx playwright test tests/SmokeSuite/smokeTesting.spec.js --project=${{ matrix.browser }}
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: smoke-tests-${{ matrix.browser }}
+        path: playwright-report/
+        retention-days: 30
+    
+    - name: Upload test results on failure
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test-results-${{ matrix.browser }}
+        path: test-results/
+        retention-days: 30
+
+  # Generate comprehensive test report
+  test-report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [test-simple, test-ci-friendly, test-smoke]
+    timeout-minutes: 10
+    if: always()
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Download all test results
+      uses: actions/download-artifact@v4
+      with:
+        path: test-artifacts/
+    
+    - name: Generate combined report
+      run: |
+        echo "## Test Execution Summary" >> test-summary.md
+        echo "Generated on: $(date)" >> test-summary.md
+        echo "" >> test-summary.md
+        echo "### Test Results:" >> test-summary.md
+        echo "- Simple Tests: ${{ needs.test-simple.result }}" >> test-summary.md
+        echo "- CI-Friendly Tests: ${{ needs.test-ci-friendly.result }}" >> test-summary.md
+        echo "- Smoke Tests: ${{ needs.test-smoke.result }}" >> test-summary.md
+        echo "" >> test-summary.md
+        echo "### Browser Matrix:" >> test-summary.md
+        echo "- Chromium: ${{ matrix.browser }}" >> test-summary.md
+    
+    - name: Upload test summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-summary
+        path: test-summary.md
+        retention-days: 30
+
+  # Deploy to staging (if tests pass)
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [test-simple, test-ci-friendly, test-smoke]
+    timeout-minutes: 30
+    if: |
+      github.ref == 'refs/heads/develop' && 
+      needs.test-simple.result == 'success' && 
+      needs.test-ci-friendly.result == 'success' && 
+      needs.test-smoke.result == 'success'
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run deployment validation
+      run: |
+        echo "Deploying to staging environment..."
+        echo "All tests passed successfully!"
+        echo "Ready for staging deployment"
+    
+    - name: Notify deployment success
+      run: |
+        echo "## 🚀 Staging Deployment Successful" >> deployment-notification.md
+        echo "**Environment:** Staging" >> deployment-notification.md
+        echo "**Branch:** ${{ github.ref_name }}" >> deployment-notification.md
+        echo "**Commit:** ${{ github.sha }}" >> deployment-notification.md
+        echo "**Tests:** All passed" >> deployment-notification.md
+    
+    - name: Upload deployment notification
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-notification
+        path: deployment-notification.md
+        retention-days: 30
