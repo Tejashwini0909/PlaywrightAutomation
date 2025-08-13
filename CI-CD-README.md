@@ -14,6 +14,7 @@ The project is integrated with GitHub Actions to provide:
 
 ### 1. Main CI/CD Pipeline (`ci-cd-pipeline.yml`)
 **Triggers:**
+- **Daily Schedule**: Automatically runs at 9:00 AM UTC every day
 - Push to `main`, `develop`, or `feature/*` branches
 - Pull requests to `main` or `develop` branches
 - Manual workflow dispatch
@@ -100,6 +101,26 @@ The project is integrated with GitHub Actions to provide:
 - **Staging**: Automatic success/failure tracking
 - **Production**: Manual deployment logs with timestamps
 - **Notifications**: Deployment artifacts for audit trails
+
+## 📅 Daily Testing Schedule
+
+### **Automated Daily Execution**
+- **Time**: 9:00 AM UTC (Coordinated Universal Time)
+- **Frequency**: Every day, automatically
+- **Purpose**: Continuous quality assurance and system monitoring
+- **Scope**: All test suites (Simple, CI-Friendly, and Smoke Tests)
+
+### **Benefits of Daily Testing**
+1. **Proactive Issue Detection**: Catches problems before they affect users
+2. **System Stability**: Monitors external dependencies and AI model availability
+3. **Quality Metrics**: Provides consistent performance and reliability data
+4. **Regression Prevention**: Ensures automation scripts remain functional
+5. **Cost-Effective**: Single daily run balances coverage with resource usage
+
+### **Daily vs. Code-Triggered Runs**
+- **Daily Runs**: Focus on system health and stability monitoring
+- **Code-Triggered Runs**: Validate specific changes and new features
+- **Distinction**: Workflow logs clearly indicate run type and trigger
 
 ## 🛠️ Local Development
 

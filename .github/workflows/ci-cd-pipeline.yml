@@ -1,6 +1,8 @@
 name: CI/CD Pipeline - Playwright Automation
 
 on:
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9:00 AM UTC
   push:
     branches: [ main, develop, feature/* ]
   pull_request:
@@ -21,6 +23,9 @@ on:
 env:
   NODE_VERSION: '18'
   PLAYWRIGHT_BROWSERS: 'chromium'
+  # Distinguish between scheduled and code-triggered runs
+  RUN_TYPE: ${{ github.event_name == 'schedule' && 'daily' || 'code-change' }}
+  RUN_TIME: ${{ github.event_name == 'schedule' && '9:00 AM UTC' || 'immediate' }}
 
 jobs:
   # Lint and validate code
@@ -42,6 +47,20 @@ jobs:
     
     - name: Validate Playwright config
       run: npx playwright --version
+    
+    - name: Log run information
+      run: |
+        echo "🚀 CI/CD Pipeline Started"
+        echo "Run Type: ${{ env.RUN_TYPE }}"
+        echo "Run Time: ${{ env.RUN_TIME }}"
+        echo "Trigger: ${{ github.event_name }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          echo "📅 This is a daily scheduled run at 9:00 AM UTC"
+        else
+          echo "💻 This is a code-change triggered run"
+        fi
 
   # Run tests in parallel
   test-simple:
@@ -179,6 +198,10 @@ jobs:
       run: |
         echo "## Test Execution Summary" >> test-summary.md
         echo "Generated on: $(date)" >> test-summary.md
+        echo "Run Type: ${{ env.RUN_TYPE }}" >> test-summary.md
+        echo "Trigger: ${{ github.event_name }}" >> test-summary.md
+        echo "Branch: ${{ github.ref_name }}" >> test-summary.md
+        echo "Commit: ${{ github.sha }}" >> test-summary.md
         echo "" >> test-summary.md
         echo "### Test Results:" >> test-summary.md
         echo "- Simple Tests: ${{ needs.test-simple.result }}" >> test-summary.md
@@ -187,6 +210,14 @@ jobs:
         echo "" >> test-summary.md
         echo "### Browser Matrix:" >> test-summary.md
         echo "- Chromium: ${{ matrix.browser }}" >> test-summary.md
+        echo "" >> test-summary.md
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          echo "### 📅 Daily Scheduled Run" >> test-summary.md
+          echo "This test execution was automatically triggered at 9:00 AM UTC as part of daily quality assurance." >> test-summary.md
+        else
+          echo "### 💻 Code-Change Triggered Run" >> test-summary.md
+          echo "This test execution was triggered by code changes or manual workflow dispatch." >> test-summary.md
+        fi
     
     - name: Upload test summary
       uses: actions/upload-artifact@v4
