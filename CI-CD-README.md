@@ -105,7 +105,7 @@ The project is integrated with GitHub Actions to provide:
 ## 📅 Daily Testing Schedule
 
 ### **Automated Daily Execution**
-- **Time**: 9:00 AM UTC (Coordinated Universal Time)
+- **Time**: 11:00 AM IST (Indian Standard Time) / 5:30 AM UTC
 - **Frequency**: Every day, automatically
 - **Purpose**: Continuous quality assurance and system monitoring
 - **Scope**: All test suites (Simple, CI-Friendly, and Smoke Tests)

@@ -2,7 +2,7 @@ name: CI/CD Pipeline - Playwright Automation
 
 on:
   schedule:
-    - cron: '0 9 * * *'  # Daily at 9:00 AM UTC
+    - cron: '30 5 * * *'  # Daily at 11:00 AM IST (5:30 AM UTC)
   push:
     branches: [ main, develop, feature/* ]
   pull_request:
@@ -25,7 +25,7 @@ env:
   PLAYWRIGHT_BROWSERS: 'chromium'
   # Distinguish between scheduled and code-triggered runs
   RUN_TYPE: ${{ github.event_name == 'schedule' && 'daily' || 'code-change' }}
-  RUN_TIME: ${{ github.event_name == 'schedule' && '9:00 AM UTC' || 'immediate' }}
+  RUN_TIME: ${{ github.event_name == 'schedule' && '11:00 AM IST' || 'immediate' }}
 
 jobs:
   # Lint and validate code
@@ -57,7 +57,7 @@ jobs:
         echo "Branch: ${{ github.ref_name }}"
         echo "Commit: ${{ github.sha }}"
         if [ "${{ github.event_name }}" == "schedule" ]; then
-          echo "📅 This is a daily scheduled run at 9:00 AM UTC"
+          echo "📅 This is a daily scheduled run at 11:00 AM IST"
         else
           echo "💻 This is a code-change triggered run"
         fi
@@ -213,7 +213,7 @@ jobs:
         echo "" >> test-summary.md
         if [ "${{ github.event_name }}" == "schedule" ]; then
           echo "### 📅 Daily Scheduled Run" >> test-summary.md
-          echo "This test execution was automatically triggered at 9:00 AM UTC as part of daily quality assurance." >> test-summary.md
+          echo "This test execution was automatically triggered at 11:00 AM IST as part of daily quality assurance." >> test-summary.md
         else
           echo "### 💻 Code-Change Triggered Run" >> test-summary.md
           echo "This test execution was triggered by code changes or manual workflow dispatch." >> test-summary.md
