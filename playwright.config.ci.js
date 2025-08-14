@@ -64,18 +64,6 @@ export default defineConfig({
     },
   ],
   
-  /* CI-specific web server configuration */
-  webServer: {
-    command: 'echo "No local server needed for CI tests"',
-    url: 'http://localhost:3000',
-    reuseExistingServer: false,
-    timeout: 120 * 1000,
-  },
-  
-  /* Global setup and teardown for CI */
-  globalSetup: undefined, // No global setup needed for CI
-  globalTeardown: undefined, // No global teardown needed for CI
-  
   /* CI-specific output directory */
   outputDir: 'test-results/',
   
