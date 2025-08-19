@@ -183,22 +183,23 @@ export class ModulePages {
         // Click the send button and wait for it to be processed
         await this.messageSend.click();
         
-        // Wait for the message to be sent and response to start appearing
+        // Wait for the message to be sent
         await this.page.waitForTimeout(2000);
         
-        // Look for indicators that the AI is responding
+        // Wait for the AI to start responding - look for typing indicators or response start
         try {
-            // Wait for either a typing indicator or the start of a response
-            await this.page.waitForSelector('div[data-role="assistant"], .assistant, [class*="assistant"], [class*="typing"], [class*="loading"]', { 
-                timeout: 10000,
+            // Wait for typing indicators or response elements to appear
+            await this.page.waitForSelector('[class*="typing"], [class*="loading"], [class*="thinking"], [class*="generating"], div[data-role="assistant"], .assistant, [class*="assistant"]', { 
+                timeout: 15000,
                 state: 'visible' 
             });
+            console.log('AI response indicator detected');
         } catch (error) {
             console.log('No immediate response indicator found, continuing...');
         }
         
-        // Additional wait for the response to be processed
-        await this.page.waitForTimeout(3000);
+        // Wait for the response to be fully generated
+        await this.page.waitForTimeout(5000);
     }
 
     /**
@@ -206,63 +207,110 @@ export class ModulePages {
      * @param {string} expectedAnswer - The expected answer text.
      */
     async verifyAssistantResponse(expectedAnswer) {
-        // Wait for the response to be generated
-        await this.page.waitForTimeout(8000);
+        // Wait longer for the response to be fully generated
+        await this.page.waitForTimeout(10000);
         
-        // Try multiple selectors to find the assistant's response
         let responseText = '';
+        let attempts = 0;
+        const maxAttempts = 3;
         
-        // Method 1: Look for the most recent assistant message in the chat
-        try {
-            // Wait for any assistant response to appear
-            await this.page.waitForSelector('div[data-role="assistant"], .assistant, [class*="assistant"]', { timeout: 10000 });
+        // Try multiple times to get the response with increasing wait times
+        while (!responseText && attempts < maxAttempts) {
+            attempts++;
+            console.log(`Attempt ${attempts} to extract response...`);
             
-            // Get all assistant messages and find the latest one
-            const assistantMessages = this.page.locator('div[data-role="assistant"], .assistant, [class*="assistant"]');
-            const count = await assistantMessages.count();
-            
-            if (count > 0) {
-                // Get the last (most recent) assistant message
-                const lastMessage = assistantMessages.nth(count - 1);
-                responseText = await lastMessage.textContent();
-            }
-        } catch (error) {
-            console.log('Method 1 failed, trying alternative selectors...');
-        }
-        
-        // Method 2: Look for response text in the chat area
-        if (!responseText || responseText.trim() === '') {
+            // Method 1: Look for specific AI response containers
             try {
-                // Look for any text content in the main chat area that's not the user's message
-                const chatArea = this.page.locator('main, [role="main"], .chat-area, .conversation');
-                if (await chatArea.count() > 0) {
-                    const allTextElements = chatArea.locator('p, div, span, h1, h2, h3, h4, h5, h6, li');
-                    const texts = await allTextElements.allTextContents();
-                    // Filter out empty texts and get the last meaningful response
-                    const meaningfulTexts = texts.filter(text => text && text.trim().length > 10);
-                    if (meaningfulTexts.length > 0) {
-                        responseText = meaningfulTexts[meaningfulTexts.length - 1];
+                // Wait for assistant response to appear
+                await this.page.waitForSelector('div[data-role="assistant"], .assistant, [class*="assistant"], [class*="message"], [class*="response"]', { 
+                    timeout: 10000 
+                });
+                
+                // Get all potential response elements
+                const responseSelectors = [
+                    'div[data-role="assistant"]',
+                    '.assistant',
+                    '[class*="assistant"]',
+                    '[class*="message"]',
+                    '[class*="response"]',
+                    '[class*="ai-message"]',
+                    '[class*="bot-message"]'
+                ];
+                
+                for (const selector of responseSelectors) {
+                    try {
+                        const elements = this.page.locator(selector);
+                        const count = await elements.count();
+                        
+                        if (count > 0) {
+                            // Get the last (most recent) response
+                            const lastElement = elements.nth(count - 1);
+                            const text = await lastElement.textContent();
+                            
+                            if (text && text.trim().length > 20 && !text.includes('the latest LEAP completed')) {
+                                responseText = text.trim();
+                                console.log(`Found response using selector: ${selector}`);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        continue;
                     }
                 }
             } catch (error) {
-                console.log('Method 2 failed, trying fallback...');
+                console.log(`Method 1 attempt ${attempts} failed`);
             }
-        }
-        
-        // Method 3: Fallback - look for any recent text content
-        if (!responseText || responseText.trim() === '') {
-            try {
-                // Look for any text that appeared after sending the message
-                const allTexts = await this.page.locator('body').textContent();
-                if (allTexts) {
-                    // Split by lines and get the last few lines that might contain the response
-                    const lines = allTexts.split('\n').filter(line => line.trim().length > 0);
-                    if (lines.length > 0) {
-                        responseText = lines.slice(-3).join(' '); // Get last 3 lines
+            
+            // Method 2: Look for response text in the chat area with better filtering
+            if (!responseText) {
+                try {
+                    const chatSelectors = [
+                        'main',
+                        '[role="main"]',
+                        '.chat-area',
+                        '.conversation',
+                        '.chat-container',
+                        '.messages-container'
+                    ];
+                    
+                    for (const chatSelector of chatSelectors) {
+                        try {
+                            const chatArea = this.page.locator(chatSelector);
+                            if (await chatArea.count() > 0) {
+                                // Look for text elements that might contain the response
+                                const textElements = chatArea.locator('p, div, span, h1, h2, h3, h4, h5, h6, li, article, section');
+                                const texts = await textElements.allTextContents();
+                                
+                                // Filter out empty texts and get meaningful responses
+                                const meaningfulTexts = texts.filter(text => 
+                                    text && 
+                                    text.trim().length > 30 && 
+                                    !text.includes('the latest LEAP completed') &&
+                                    !text.includes('Login') &&
+                                    !text.includes('Password') &&
+                                    !text.includes('Email')
+                                );
+                                
+                                if (meaningfulTexts.length > 0) {
+                                    // Get the last meaningful response
+                                    responseText = meaningfulTexts[meaningfulTexts.length - 1].trim();
+                                    console.log(`Found response in chat area using selector: ${chatSelector}`);
+                                    break;
+                                }
+                            }
+                        } catch (error) {
+                            continue;
+                        }
                     }
+                } catch (error) {
+                    console.log(`Method 2 attempt ${attempts} failed`);
                 }
-            } catch (error) {
-                console.log('All methods failed to extract response text');
+            }
+            
+            // If still no response, wait longer and try again
+            if (!responseText && attempts < maxAttempts) {
+                console.log(`No response found, waiting 5 seconds before retry...`);
+                await this.page.waitForTimeout(5000);
             }
         }
         
@@ -272,6 +320,27 @@ export class ModulePages {
         // Log the extracted text for debugging
         console.log(`Extracted response text: "${responseText.substring(0, 200)}..."`);
         
+        // If no response found, get page context for debugging
+        if (!responseText) {
+            const pageTitle = await this.page.title();
+            const currentUrl = this.page.url();
+            console.log(`Page title: ${pageTitle}`);
+            console.log(`Current URL: ${currentUrl}`);
+            
+            // Take a screenshot for debugging
+            await this.page.screenshot({ path: 'debug-response.png' });
+            
+            // Try to get any visible text on the page
+            const bodyText = await this.page.locator('body').textContent();
+            if (bodyText) {
+                const lines = bodyText.split('\n').filter(line => line.trim().length > 20);
+                if (lines.length > 0) {
+                    responseText = lines.slice(-5).join(' ').trim(); // Get last 5 lines
+                    console.log(`Fallback: Using body text: "${responseText.substring(0, 200)}..."`);
+                }
+            }
+        }
+        
         // More flexible matching - check if any part of the expected answer is in the response
         const expectedWords = expectedAnswer.toLowerCase().split(' ');
         const responseLower = responseText.toLowerCase();
@@ -280,11 +349,9 @@ export class ModulePages {
         const hasMatch = expectedWords.some(word => responseLower.includes(word));
         
         if (!hasMatch) {
-            // If no match found, try to get more context about what's on the page
-            const pageTitle = await this.page.title();
-            const currentUrl = this.page.url();
-            console.log(`Page title: ${pageTitle}`);
-            console.log(`Current URL: ${currentUrl}`);
+            // If no match found, log more debugging information
+            console.log(`Expected keywords: ${expectedWords.join(', ')}`);
+            console.log(`Response text: ${responseText}`);
             
             // Take a screenshot for debugging
             await this.page.screenshot({ path: 'debug-response.png' });
