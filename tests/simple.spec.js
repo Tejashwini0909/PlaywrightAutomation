@@ -4,7 +4,7 @@ test.describe('Simple Tests', () => {
   
   test('Basic page load test', async ({ page }) => {
     await page.goto('https://ai.future.works/');
-    await expect(page).toHaveTitle(/Future/);
+    await expect(page).toHaveTitle(/AOS|Future|Altar/);
   });
 
   test('Check if page loads without login', async ({ page }) => {

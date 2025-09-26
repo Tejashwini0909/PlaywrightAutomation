@@ -42,7 +42,7 @@ test.describe('FW Tests', () => {
       await modulepageObject.selectModule('grok-4');
       await modulepageObject.selectFutureWorksIfNotSelected();
       await modulepageObject.sendMessage('What is Sanity Testing?');
-      await modulepageObject.verifyAssistantResponse('sanity');
+      await modulepageObject.verifyAssistantResponse('sanity testing');
       console.log('✅ TC_01 - grok-4 test completed successfully');
     } catch (error) {
       console.error('❌ TC_01 - grok-4 test failed:', error.message);
@@ -57,7 +57,7 @@ test.describe('FW Tests', () => {
       await modulepageObject.selectModule('gemini-2.5-pro');
       await modulepageObject.selectFutureWorksIfNotSelected();
       await modulepageObject.sendMessage('What is Functional Testing?');
-      await modulepageObject.verifyAssistantResponse('functional');
+      await modulepageObject.verifyAssistantResponse('functional testing');
       console.log('✅ TC_03 - gemini-2.5-pro test completed successfully');
     } catch (error) {
       console.error('❌ TC_03 - gemini-2.5-pro test failed:', error.message);

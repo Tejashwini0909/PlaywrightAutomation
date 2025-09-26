@@ -260,6 +260,9 @@ export class ModulePages {
                             'loading',
                             'please wait',
                             'generating response',
+                            'plan:',
+                            'reasoning',
+                            'tool used:',
                             '...'
                         ];
                         
