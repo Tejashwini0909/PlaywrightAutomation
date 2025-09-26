@@ -1,362 +1,326 @@
-import { Page, expect } from '@playwright/test';
 
+import { Page, expect } from '@playwright/test';
+import { TimeoutConfig } from '../utils/config.js';
 export class ModulePages {
+    page;
+    btnContinueWithGoogle;
+    iptEmail;
+    btnNext;
+    iptPassword;
+    moduleDrpDown;
+    messageBox;
+    messageSend;
+    stopbtn;
+    futureWorksChkbox;
 
     constructor(page) {
         this.page = page;
+        TimeoutConfig.logConfig();
         this.btnContinueWithGoogle = page.locator("//button[text() = 'Continue with Google']");
         this.iptEmail = page.locator("//input[@aria-label='Email or phone']");
         this.btnNext = page.locator("(//span[text() = 'Next'])[last()]");
         this.iptPassword = page.locator("//input[@aria-label='Enter your password']");
-        
-        // Workspace selection locators
-        this.workspaceDropdown = page.locator("//button[contains(@aria-label, 'workspace') or contains(@aria-label, 'Workspace') or contains(@aria-label, 'organization')]");
-        this.workspaceOption = page.locator("//div[@role='menuitem']//span[contains(text(), 'Future Works') or contains(text(), 'future.works')]");
-        
         this.moduleDrpDown = page.locator("(//button[@aria-haspopup='menu'])[last()]");
-
         this.messageBox = page.locator("//textarea[@placeholder ='Send a message...']");
         this.messageSend = page.locator("//div[contains(@class, 'justify-end')]");
         this.stopbtn = page.locator("//div[contains(@class, 'justify-end')]//*[@fill-rule='evenodd' and @clip-rule='evenodd' ]");
+        this.assistantContainer = page.locator("//div[@data-role='assistant']");
+        this.thinkingTxt = page.locator("//div[text() = 'Thinking...']");
+        this.futureWorksChkbox = page.locator("//span[text() = 'Future Works']//following-sibling::button");
+        this.waitAssistantContainer = page.locator("(//div[@data-role='assistant']//p)[last()]");
+    }
 
-    }
- 
-    async selectFutureWorksWorkspace() {
-        console.log('Checking if Future Works workspace selection is needed...');
-        await this.page.waitForLoadState('networkidle');
-        
-        // First, check if we're already in the Future Works workspace
-        try {
-            const futureWorksText = this.page.locator("//span[contains(text(), 'Future Works') or contains(text(), 'future.works')]");
-            if (await futureWorksText.count() > 0) {
-                console.log('Already in Future Works workspace, no selection needed');
-                return;
-            }
-        } catch (error) {
-            console.log('Could not determine current workspace, proceeding with selection attempt...');
-        }
-        
-        try {
-            // Try to find and click the workspace dropdown
-            const workspaceDropdown = this.page.locator("//button[contains(@aria-label, 'workspace') or contains(@aria-label, 'Workspace') or contains(@aria-label, 'organization') or contains(@class, 'workspace') or contains(@class, 'organization')]");
-            
-            if (await workspaceDropdown.count() > 0) {
-                await workspaceDropdown.first().click();
-                console.log('Workspace dropdown clicked');
-                
-                // Wait for the dropdown menu to appear
-                await this.page.waitForTimeout(1000);
-                
-                // Look for the Future Works option
-                const futureWorksOption = this.page.locator("//div[@role='menuitem']//span[contains(text(), 'Future Works') or contains(text(), 'future.works')]");
-                if (await futureWorksOption.count() > 0) {
-                    await futureWorksOption.first().click();
-                    console.log('Future Works workspace selected successfully');
-                    await this.page.waitForTimeout(2000);
-                    return;
-                }
-            }
-            
-            console.log('No workspace dropdown found, checking if workspace selection is needed...');
-            
-            // Check if we can proceed without workspace selection
-            const pageTitle = await this.page.title();
-            const currentUrl = this.page.url();
-            
-            if (currentUrl.includes('future.works') || pageTitle.includes('Future Works')) {
-                console.log('Already in Future Works context, proceeding without explicit workspace selection');
-                return;
-            }
-            
-        } catch (error) {
-            console.log(`Workspace selection attempt failed: ${error.message}`);
-        }
-        
-        // If we get here, workspace selection wasn't possible or needed
-        console.log('Proceeding without explicit workspace selection - may already be in correct workspace');
-    }
- 
     async selectModule(moduleName) {
-        console.log(`Selecting module: ${moduleName}`);
         await this.page.waitForLoadState('networkidle');
         
-        // Wait for the dropdown to be visible and clickable
-        await this.moduleDrpDown.waitFor({ state: 'visible', timeout: 10000 });
+        // Add debugging to see what's on the page
+        console.log('🔍 Current URL:', this.page.url());
+        console.log('🔍 Page title:', await this.page.title());
         
-        // Click the dropdown button
-        await this.moduleDrpDown.click();
-        console.log('Module dropdown clicked');
+        // Try multiple locators for the module dropdown - more specific ones first
+        const possibleDropdowns = [
+            "//button[contains(@aria-label, 'model') or contains(@aria-label, 'module')]",
+            "//button[contains(text(), 'Select Model') or contains(text(), 'Select Module')]",
+            "//div[contains(@class, 'model') or contains(@class, 'module')]//button",
+            "//button[contains(@class, 'model') or contains(@class, 'module')]",
+            "//select[contains(@name, 'model') or contains(@name, 'module')]",
+            "//div[contains(@data-testid, 'model') or contains(@data-testid, 'module')]//button",
+            "//button[@aria-haspopup='menu' and not(contains(@class, 'sidebar'))]",
+            "//button[@aria-haspopup='menu' and not(contains(@data-sidebar, 'menu'))]",
+            "//button[@aria-haspopup='menu' and not(contains(@class, 'peer'))]"
+        ];
         
-        // Wait for the dropdown menu to appear
-        await this.page.waitForTimeout(1000);
-        
-        // Try to find and select the module by name
-        try {
-            // Wait for the specific module option to be visible
-            const moduleOption = this.page.locator(`//div[@role='menuitem']//span[text() = '${moduleName}']`);
-            await moduleOption.waitFor({ state: 'visible', timeout: 5000 });
-            
-            // Click the module option
-            await moduleOption.click();
-            console.log(`Module ${moduleName} selected successfully`);
-            
-            // Wait for the module to be loaded
-            await this.page.waitForTimeout(2000);
-            
-        } catch (error) {
-            console.log(`Failed to select module ${moduleName} with first method, trying alternative...`);
-            
-            // Alternative method: try to find by partial text match
+        let dropdownFound = false;
+        for (const locator of possibleDropdowns) {
             try {
-                const partialMatch = this.page.locator(`//div[@role='menuitem']//span[contains(text(), '${moduleName}')]`);
-                if (await partialMatch.count() > 0) {
-                    await partialMatch.first().click();
-                    console.log(`Module ${moduleName} selected with partial match`);
-                    await this.page.waitForTimeout(2000);
-                } else {
-                    throw new Error(`Module ${moduleName} not found in dropdown`);
+                const element = this.page.locator(locator);
+                const count = await element.count();
+                console.log(`🔍 Checking locator "${locator}": found ${count} elements`);
+                
+                if (count > 0) {
+                    const isVisible = await element.first().isVisible();
+                    console.log(`🔍 First element visible: ${isVisible}`);
+                    
+                    if (isVisible) {
+                        this.moduleDrpDown = element.first();
+                        dropdownFound = true;
+                        break;
+                    }
                 }
-            } catch (altError) {
-                console.log(`Alternative method also failed: ${altError.message}`);
-                throw new Error(`Could not select module ${moduleName}`);
+            } catch (error) {
+                console.log(`🔍 Locator "${locator}" failed: ${error.message}`);
             }
         }
         
-        // Verify the module was selected by checking if the dropdown shows the selected module
-        try {
-            const selectedModuleText = await this.moduleDrpDown.textContent();
-            console.log(`Current selected module: ${selectedModuleText}`);
-        } catch (error) {
-            console.log('Could not verify selected module text');
+        if (!dropdownFound) {
+            // Take a screenshot for debugging
+            await this.page.screenshot({ path: 'debug-module-dropdown.png' });
+            console.log('📸 Screenshot saved as debug-module-dropdown.png');
+            
+            // Get all buttons on the page for debugging
+            const allButtons = await this.page.locator('button').all();
+            console.log(`🔍 Found ${allButtons.length} buttons on the page:`);
+            for (let i = 0; i < Math.min(allButtons.length, 10); i++) {
+                try {
+                    const text = await allButtons[i].textContent();
+                    const ariaLabel = await allButtons[i].getAttribute('aria-label');
+                    const className = await allButtons[i].getAttribute('class');
+                    console.log(`  Button ${i}: text="${text}", aria-label="${ariaLabel}", class="${className?.substring(0, 50)}..."`);
+                } catch (e) {
+                    console.log(`  Button ${i}: Error getting details`);
+                }
+            }
+            
+            throw new Error('Module dropdown not found on the page');
+        }
+        
+        await this.moduleDrpDown.waitFor({ state: 'visible', timeout: 10000 });
+        await this.moduleDrpDown.click();
+
+        // Wait for menu container
+        const menu = this.page.getByRole('menu');
+        await menu.first().waitFor({ state: 'visible' });
+        
+        // Debug: List all available menu items
+        const menuItems = await this.page.locator('[role="menuitem"]').all();
+        console.log(`🔍 Found ${menuItems.length} menu items:`);
+        for (let i = 0; i < Math.min(menuItems.length, 10); i++) {
+            try {
+                const text = await menuItems[i].textContent();
+                console.log(`  ${i}: "${text}"`);
+            } catch (e) {
+                console.log(`  ${i}: Error getting text`);
+            }
+        }
+
+        // Try role-based locator first
+        let option = this.page.getByRole('menuitem', { name: moduleName });
+        if (await option.count() === 0) {
+            option = this.page.getByRole('menuitem', { name: new RegExp(moduleName, 'i') });
+        }
+
+        // If not visible, try paging through the menu
+        let clicked = false;
+        for (let i = 0; i < 12; i++) {
+            if (await option.count() > 0 && await option.first().isVisible()) {
+                await option.first().click();
+                clicked = true;
+                break;
+            }
+            // Scroll the menu container if possible
+            await this.page.keyboard.press('PageDown');
+            await this.page.waitForTimeout(150);
+        }
+
+        // Last resort: try ensuring into view and click
+        if (!clicked) {
+            const xpathExact = this.page.locator(`//div[@role='menuitem']//span[normalize-space(.)='${moduleName}']`).first();
+            const xpathContains = this.page.locator(`//div[@role='menuitem']//span[contains(normalize-space(.), '${moduleName}')]`).first();
+            const candidate = (await xpathExact.count()) > 0 ? xpathExact : xpathContains;
+            await candidate.scrollIntoViewIfNeeded();
+            await candidate.waitFor({ state: 'visible' });
+            await candidate.click();
+        }
+
+        await this.page.waitForTimeout(500);
+    }
+
+    async selectFutureWorksIfNotSelected() {
+        await this.futureWorksChkbox.waitFor({ state: 'visible' });
+        const isChecked = await this.futureWorksChkbox.getAttribute('aria-checked');
+        const dataState = await this.futureWorksChkbox.getAttribute('data-state');
+        if (isChecked !== 'true' && dataState !== 'checked') {
+            await this.futureWorksChkbox.click();
+            await this.page.waitForTimeout(1000);
         }
     }
-    
+
     async loginWithGoogle(email, password) {
-        console.log('Starting Google login process...');
         await this.page.waitForLoadState('networkidle');
-        
-        // Wait for and click the Continue with Google button
-        await this.btnContinueWithGoogle.waitFor({ state: 'visible', timeout: 10000 }); 
+        await this.btnContinueWithGoogle.waitFor({ state: 'visible' });
         await this.btnContinueWithGoogle.click();
-        console.log('Continue with Google button clicked');
-        
-        // Wait for the Google login page to load
-        await this.page.waitForTimeout(2000);
-        
-        // Fill in the email
-        await this.iptEmail.waitFor({ state: 'visible', timeout: 10000 });
         await this.iptEmail.fill(email);
-        console.log('Email filled');
-        
-        // Click Next
         await this.btnNext.click();
-        console.log('Next button clicked after email');
-        
-        // Wait for password field to appear
-        await this.page.waitForTimeout(2000);
-        
-        // Fill in the password
-        await this.iptPassword.waitFor({ state: 'visible', timeout: 10000 });
         await this.iptPassword.fill(password);
-        console.log('Password filled');
-        
-        // Click Next to complete login
         await this.btnNext.click();
-        console.log('Next button clicked after password');
-        
-        // Wait for login to complete and redirect back to the application
-        await this.page.waitForTimeout(5000);
-        
-        // Wait for the application to load after successful login
-        try {
-            await this.page.waitForLoadState('networkidle', { timeout: 15000 });
-            console.log('Login completed successfully, application loaded');
-        } catch (error) {
-            console.log('Login may have completed, but application load timeout reached');
-        }
     }
 
     async sendMessage(message) {
         await this.messageBox.waitFor({ state: 'visible' });
         await this.messageBox.fill(message);
-        
-        // Click the send button and wait for it to be processed
         await this.messageSend.click();
-        
-        // Wait for the message to be sent
-        await this.page.waitForTimeout(2000);
-        
-        // Wait for the AI to start responding - look for typing indicators or response start
-        try {
-            // Wait for typing indicators or response elements to appear
-            await this.page.waitForSelector('[class*="typing"], [class*="loading"], [class*="thinking"], [class*="generating"], div[data-role="assistant"], .assistant, [class*="assistant"]', { 
-                timeout: 15000,
-                state: 'visible' 
-            });
-            console.log('AI response indicator detected');
-        } catch (error) {
-            console.log('No immediate response indicator found, continuing...');
-        }
-        
-        // Wait for the response to be fully generated
-        await this.page.waitForTimeout(5000);
+        await this.page.waitForTimeout(3000); // Wait for the response to be processed 
     }
 
     /**
-     * Verifies the assistant's response matches the expected answer.
+     * Verifies the assistant's response matches the expected answer with retry logic.
      * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
      */
-    async verifyAssistantResponse(expectedAnswer) {
-        // Wait longer for the response to be fully generated
-        await this.page.waitForTimeout(10000);
-        
-        let responseText = '';
-        let attempts = 0;
-        const maxAttempts = 3;
-        
-        // Try multiple times to get the response with increasing wait times
-        while (!responseText && attempts < maxAttempts) {
-            attempts++;
-            console.log(`Attempt ${attempts} to extract response...`);
-            
-            // Method 1: Look for specific AI response containers
+    async verifyAssistantResponse(expectedAnswer, retries = 2) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
             try {
-                // Wait for assistant response to appear
-                await this.page.waitForSelector('div[data-role="assistant"], .assistant, [class*="assistant"], [class*="message"], [class*="response"]', { 
-                    timeout: 10000 
-                });
-                
-                // Get all potential response elements
-                const responseSelectors = [
-                    'div[data-role="assistant"]',
-                    '.assistant',
-                    '[class*="assistant"]',
-                    '[class*="message"]',
-                    '[class*="response"]',
-                    '[class*="ai-message"]',
-                    '[class*="bot-message"]'
-                ];
-                
-                for (const selector of responseSelectors) {
-                    try {
-                        const elements = this.page.locator(selector);
-                        const count = await elements.count();
-                        
-                        if (count > 0) {
-                            // Get the last (most recent) response
-                            const lastElement = elements.nth(count - 1);
-                            const text = await lastElement.textContent();
-                            
-                            if (text && text.trim().length > 20 && !text.includes('the latest LEAP completed')) {
-                                responseText = text.trim();
-                                console.log(`Found response using selector: ${selector}`);
-                                break;
-                            }
-                        }
-                    } catch (error) {
-                        continue;
-                    }
+                // Check if page is still valid before proceeding
+                if (this.page.isClosed()) {
+                    throw new Error('Page has been closed, cannot continue verification');
                 }
-            } catch (error) {
-                console.log(`Method 1 attempt ${attempts} failed`);
-            }
-            
-            // Method 2: Look for response text in the chat area with better filtering
-            if (!responseText) {
-                try {
-                    const chatSelectors = [
-                        'main',
-                        '[role="main"]',
-                        '.chat-area',
-                        '.conversation',
-                        '.chat-container',
-                        '.messages-container'
+
+                console.log(`🔍 Attempt ${attempt}: Looking for assistant response...`);
+                
+                // First, let's see what's actually on the page
+                const assistantElements = await this.assistantContainer.count();
+                console.log(`🔍 Found ${assistantElements} assistant container elements`);
+                
+                // Check if thinking text exists and wait for it to disappear
+                const thinkingExists = await this.thinkingTxt.count() > 0;
+                console.log(`🔍 Thinking text exists: ${thinkingExists}`);
+                
+                if (thinkingExists) {
+                    console.log('🔍 Waiting for thinking text to disappear...');
+                    await this.thinkingTxt.waitFor({ state: 'hidden', timeout: 30000 });
+                    console.log('✅ Thinking text disappeared');
+                }
+                
+                // Wait a bit for response to generate
+                console.log('🔍 Waiting for response generation...');
+                await this.page.waitForTimeout(5000); // Reduced from 10s to 5s
+                
+                // Check page state again before verification
+                if (this.page.isClosed()) {
+                    throw new Error('Page was closed during response generation');
+                }
+                
+                // Look for any response elements
+                const responseElements = await this.page.locator('[data-role="assistant"]').count();
+                console.log(`🔍 Found ${responseElements} assistant response elements`);
+                
+                // Wait for a complete response (not just "Resolving context..." or "Thinking...")
+                console.log('🔍 Waiting for complete response...');
+                let responseText = '';
+                let attempts = 0;
+                const maxWaitAttempts = 10; // Wait up to 10 * 2 = 20 seconds
+                
+                while (attempts < maxWaitAttempts) {
+                    // Try multiple selectors for response content
+                    const responseSelectors = [
+                        '//div[@data-role="assistant"]//p[last()]',
+                        '//div[@data-role="assistant"]//div[last()]',
+                        '//div[@data-role="assistant"]//span[last()]',
+                        '//div[@data-role="assistant"]//*[text()]',
+                        '//div[contains(@class, "message") or contains(@class, "response")]',
+                        '//div[contains(@class, "assistant")]//*[text()]'
                     ];
                     
-                    for (const chatSelector of chatSelectors) {
+                    let foundText = '';
+                    for (const selector of responseSelectors) {
                         try {
-                            const chatArea = this.page.locator(chatSelector);
-                            if (await chatArea.count() > 0) {
-                                // Look for text elements that might contain the response
-                                const textElements = chatArea.locator('p, div, span, h1, h2, h3, h4, h5, h6, li, article, section');
-                                const texts = await textElements.allTextContents();
-                                
-                                // Filter out empty texts and get meaningful responses
-                                const meaningfulTexts = texts.filter(text => 
-                                    text && 
-                                    text.trim().length > 30 && 
-                                    !text.includes('the latest LEAP completed') &&
-                                    !text.includes('Login') &&
-                                    !text.includes('Password') &&
-                                    !text.includes('Email')
-                                );
-                                
-                                if (meaningfulTexts.length > 0) {
-                                    // Get the last meaningful response
-                                    responseText = meaningfulTexts[meaningfulTexts.length - 1].trim();
-                                    console.log(`Found response in chat area using selector: ${chatSelector}`);
+                            const element = this.page.locator(selector);
+                            const count = await element.count();
+                            if (count > 0) {
+                                const text = await element.first().textContent();
+                                if (text && text.trim().length > 0) {
+                                    foundText = text.trim();
                                     break;
                                 }
                             }
-                        } catch (error) {
-                            continue;
+                        } catch (e) {
+                            // Continue to next selector
                         }
                     }
-                } catch (error) {
-                    console.log(`Method 2 attempt ${attempts} failed`);
+                    
+                    if (foundText) {
+                        console.log(`🔍 Found text: "${foundText.substring(0, 100)}..."`);
+                        
+                        // Check if it's a complete response (not just processing messages)
+                        const processingMessages = [
+                            'resolving context',
+                            'thinking',
+                            'processing',
+                            'loading',
+                            'please wait',
+                            'generating response',
+                            '...'
+                        ];
+                        
+                        const isProcessing = processingMessages.some(msg => 
+                            foundText.toLowerCase().includes(msg)
+                        );
+                        
+                        if (!isProcessing && foundText.length > 10) {
+                            responseText = foundText;
+                            console.log(`✅ Found complete response: "${responseText.substring(0, 100)}..."`);
+                            break;
+                        } else {
+                            console.log(`⏳ Still processing... (${foundText.substring(0, 50)})`);
+                        }
+                    }
+                    
+                    attempts++;
+                    await this.page.waitForTimeout(2000); // Wait 2 seconds between checks
+                }
+                
+                if (!responseText) {
+                    // Take screenshot for debugging
+                    await this.page.screenshot({ path: `debug-response-attempt-${attempt}.png` });
+                    console.log(`📸 Screenshot saved as debug-response-attempt-${attempt}.png`);
+                    throw new Error(`No complete response found after ${maxWaitAttempts * 2} seconds on attempt ${attempt}`);
+                }
+                
+                // Verify expected answer in assistant response
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = responseText.toLowerCase();
+
+                // Check if at least one word from expected answer is in the response
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${responseText.substring(0, 200)}..."`).toBeTruthy();
+                
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                console.log(`Attempt ${attempt} failed: ${error.message}`);
+                
+                if (attempt < retries) {
+                    console.log(`Retrying attempt ${attempt + 1}...`);
+                    
+                    // Check if page is still valid before retrying
+                    if (this.page.isClosed()) {
+                        console.log('❌ Page was closed, cannot retry');
+                        throw new Error('Page was closed during retry attempt');
+                    }
+                    
+                    try {
+                        // Shorter wait time for retry
+                        await this.page.waitForTimeout(2000);
+                    } catch (waitError) {
+                        console.log(`❌ Page became invalid during retry wait: ${waitError.message}`);
+                        throw new Error(`Page became invalid during retry: ${waitError.message}`);
+                    }
+                } else {
+                    console.log(`❌ All ${retries} attempts failed`);
                 }
             }
-            
-            // If still no response, wait longer and try again
-            if (!responseText && attempts < maxAttempts) {
-                console.log(`No response found, waiting 5 seconds before retry...`);
-                await this.page.waitForTimeout(5000);
-            }
         }
-        
-        // Clean up the response text
-        responseText = responseText ? responseText.trim() : '';
-        
-        // Log the extracted text for debugging
-        console.log(`Extracted response text: "${responseText.substring(0, 200)}..."`);
-        
-        // If no response found, get page context for debugging
-        if (!responseText) {
-            const pageTitle = await this.page.title();
-            const currentUrl = this.page.url();
-            console.log(`Page title: ${pageTitle}`);
-            console.log(`Current URL: ${currentUrl}`);
-            
-            // Take a screenshot for debugging
-            await this.page.screenshot({ path: 'debug-response.png' });
-            
-            // Try to get any visible text on the page
-            const bodyText = await this.page.locator('body').textContent();
-            if (bodyText) {
-                const lines = bodyText.split('\n').filter(line => line.trim().length > 20);
-                if (lines.length > 0) {
-                    responseText = lines.slice(-5).join(' ').trim(); // Get last 5 lines
-                    console.log(`Fallback: Using body text: "${responseText.substring(0, 200)}..."`);
-                }
-            }
-        }
-        
-        // More flexible matching - check if any part of the expected answer is in the response
-        const expectedWords = expectedAnswer.toLowerCase().split(' ');
-        const responseLower = responseText.toLowerCase();
-        
-        // Check if at least one word from expected answer is in the response
-        const hasMatch = expectedWords.some(word => responseLower.includes(word));
-        
-        if (!hasMatch) {
-            // If no match found, log more debugging information
-            console.log(`Expected keywords: ${expectedWords.join(', ')}`);
-            console.log(`Response text: ${responseText}`);
-            
-            // Take a screenshot for debugging
-            await this.page.screenshot({ path: 'debug-response.png' });
-        }
-        
-        expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${responseText.substring(0, 200)}..."`).toBeTruthy();
+        throw lastError; // If all retries fail, throw the last error
     }
 }

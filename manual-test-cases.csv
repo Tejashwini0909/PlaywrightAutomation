@@ -1,0 +1,421 @@
+xzffffTest Case ID,Test Case Name,Priority,Test Type,Precondition,Test Steps,Expected Results,Actual Results,Status,Notes,Test Suite
+TC001,Page Load and Basic Elements,High,Functional,"User has internet access and browser is functional","1. Open browser and navigate to https://staging.ai.future.works/
+2. Wait for page to fully load
+3. Verify page elements are displayed","- Page loads within 5 seconds
+- Future Work logo is visible and properly displayed
+- ""Continue with Google"" button is present and visible
+- Page has proper layout and spacing
+- No JavaScript errors in browser console",,,UI/UX Validation
+TC002,Logo Display and Branding,High,UI/Visual,Page is loaded,"1. Verify Future Work logo is displayed
+2. Check logo positioning and alignment
+3. Verify logo quality and resolution
+4. Check if logo is clickable (if applicable)","- Logo is clearly visible and readable
+- Logo is properly centered or positioned as per design
+- Logo has good resolution (not pixelated)
+- Logo maintains aspect ratio on different screen sizes",,,UI/UX Validation
+TC003,Google Sign-in Button Functionality,Critical,Functional,"Page is loaded and Google sign-in button is visible","1. Locate ""Continue with Google"" button
+2. Verify button is clickable
+3. Click on the button
+4. Observe the response/redirect","- Button is clearly visible and properly styled
+- Button text ""Continue with Google"" is readable
+- Button responds to hover effects (if any)
+- Clicking button initiates Google OAuth flow
+- User is redirected to Google sign-in page",,,UI/UX Validation
+TC004,Responsive Design - Desktop,Medium,UI/Responsive,Page is loaded on desktop browser,"1. Open page on desktop browser (1920x1080 or similar)
+2. Verify all elements are properly positioned
+3. Check spacing and alignment
+4. Verify text readability","- All elements are properly positioned
+- Adequate spacing between elements
+- Text is readable and properly sized
+- Layout looks professional and organized",,,UI/UX Validation
+TC005,Responsive Design - Tablet,Medium,UI/Responsive,Page is loaded on tablet device/browser,"1. Resize browser to tablet dimensions (768x1024)
+2. Verify page elements adapt properly
+3. Check if layout remains usable
+4. Verify touch targets are appropriate size","- Page elements adapt to tablet screen size
+- Layout remains functional and organized
+- Touch targets (buttons) are appropriately sized
+- No horizontal scrolling required",,,UI/UX Validation
+TC006,Responsive Design - Mobile,Medium,UI/Responsive,Page is loaded on mobile device/browser,"1. Resize browser to mobile dimensions (375x667)
+2. Verify page elements adapt properly
+3. Check if layout remains usable
+4. Verify touch targets are appropriate size","- Page elements adapt to mobile screen size
+- Layout remains functional and organized
+- Touch targets (buttons) are appropriately sized
+- No horizontal scrolling required
+- Text remains readable",,,UI/UX Validation
+TC007,Cross-Browser Compatibility - Chrome,High,Compatibility,Chrome browser is installed,"1. Open page in Chrome browser
+2. Verify all elements display correctly
+3. Test Google sign-in functionality
+4. Check for any console errors","- All elements display correctly
+- Google sign-in works as expected
+- No console errors
+- Page functions normally",,,UI/UX Validation
+TC008,Cross-Browser Compatibility - Firefox,High,Compatibility,Firefox browser is installed,"1. Open page in Firefox browser
+2. Verify all elements display correctly
+3. Test Google sign-in functionality
+4. Check for any console errors","- All elements display correctly
+- Google sign-in works as expected
+- No console errors
+- Page functions normally",,,UI/UX Validation
+TC009,Cross-Browser Compatibility - Safari,Medium,Compatibility,Safari browser is available,"1. Open page in Safari browser
+2. Verify all elements display correctly
+3. Test Google sign-in functionality
+4. Check for any console errors","- All elements display correctly
+- Google sign-in works as expected
+- No console errors
+- Page functions normally",,,UI/UX Validation
+TC010,Page Performance,Medium,Performance,Page is accessible,"1. Open browser developer tools
+2. Navigate to Network tab
+3. Reload the page
+4. Monitor load times and resources","- Page loads within 3-5 seconds
+- No failed resource requests
+- Reasonable number of HTTP requests
+- Images and assets load properly",,,UI/UX Validation
+TC011,Accessibility - Keyboard Navigation,Medium,Accessibility,Page is loaded,"1. Use Tab key to navigate through page elements
+2. Verify focus indicators are visible
+3. Test Enter key functionality on focused elements
+4. Verify logical tab order","- All interactive elements are reachable via keyboard
+- Focus indicators are clearly visible
+- Tab order is logical and intuitive
+- Enter key activates focused elements",,,UI/UX Validation
+TC012,Accessibility - Screen Reader,Medium,Accessibility,Screen reader software is available,"1. Activate screen reader
+2. Navigate through page elements
+3. Verify proper labeling and descriptions
+4. Check for meaningful alt text","- Screen reader can identify all elements
+- Proper labels and descriptions are provided
+- Images have meaningful alt text
+- Navigation is logical and accessible",,,UI/UX Validation
+TC013,Security - HTTPS Validation,High,Security,Page is accessible,"1. Verify URL starts with https://
+2. Check browser security indicators
+3. Verify SSL certificate is valid
+4. Check for mixed content warnings","- URL uses HTTPS protocol
+- Browser shows secure connection indicator
+- SSL certificate is valid and not expired
+- No mixed content warnings",,,UI/UX Validation
+TC014,Error Handling - Network Issues,Medium,Error Handling,Page is accessible,"1. Simulate slow network connection (DevTools)
+2. Reload page with slow network
+3. Verify appropriate loading states
+4. Check error handling for failed requests","- Page shows appropriate loading indicators
+- Graceful handling of slow connections
+- Clear error messages if requests fail
+- Page remains functional",,,UI/UX Validation
+TC015,Content Validation,High,Content,Page is loaded,"1. Verify ""Future Work"" branding is correct
+2. Check ""Continue with Google"" button text
+3. Verify no placeholder or lorem ipsum text
+4. Check for any broken links or references","- Branding text is accurate and professional
+- Button text is clear and actionable
+- No placeholder content visible
+- All content appears intentional and complete",,,UI/UX Validation
+TC016,Cross-Browser Compatibility - Edge,Medium,Compatibility,Edge browser is available,"1. Open page in Edge browser
+2. Verify all elements display correctly
+3. Test Google sign-in functionality
+4. Check for any console errors","- All elements display correctly
+- Google sign-in works as expected
+- No console errors
+- Page functions normally",,Advanced Browser Testing
+TC017,Cross-Browser Compatibility - Opera,Low,Compatibility,Opera browser is available,"1. Open page in Opera browser
+2. Verify all elements display correctly
+3. Test Google sign-in functionality
+4. Check for any console errors","- All elements display correctly
+- Google sign-in works as expected
+- No console errors
+- Page functions normally",,Advanced Browser Testing
+TC018,Browser Version Compatibility - Chrome,Medium,Compatibility,Multiple Chrome versions available,"1. Test on Chrome version 100+
+2. Test on Chrome version 90-99
+3. Test on Chrome version 80-89
+4. Verify functionality across versions","- Page works on all supported Chrome versions
+- No version-specific issues
+- Consistent behavior across versions",,Advanced Browser Testing
+TC019,Responsive Design - Large Desktop,Low,UI/Responsive,Page is loaded on large desktop,"1. Resize browser to large desktop dimensions (2560x1440)
+2. Verify page elements scale appropriately
+3. Check if layout remains balanced
+4. Verify content doesn't appear too small","- Page elements scale appropriately
+- Layout remains balanced and professional
+- Content remains readable and well-proportioned
+- No excessive white space",,Responsive Design - Extended
+TC020,Responsive Design - Small Mobile,Medium,UI/Responsive,Page is loaded on small mobile,"1. Resize browser to small mobile dimensions (320x568)
+2. Verify page elements adapt properly
+3. Check if layout remains usable
+4. Verify touch targets are appropriate size","- Page elements adapt to small mobile screen
+- Layout remains functional and organized
+- Touch targets meet minimum size requirements (44px)
+- No horizontal scrolling required",,Responsive Design - Extended
+TC021,Responsive Design - Landscape Orientation,Medium,UI/Responsive,Page is accessible on mobile/tablet,"1. Rotate device to landscape orientation
+2. Verify page elements adapt properly
+3. Check if layout remains usable
+4. Verify touch targets are appropriate size","- Page elements adapt to landscape orientation
+- Layout remains functional and organized
+- Touch targets remain appropriately sized
+- Content is properly displayed",,Responsive Design - Extended
+TC022,Page Load Performance - Slow 3G,Medium,Performance,DevTools available,"1. Open DevTools and set network to Slow 3G
+2. Reload the page
+3. Monitor load times and performance
+4. Check for any timeout issues","- Page loads within reasonable time on slow network
+- No timeout errors occur
+- Loading indicators are shown appropriately
+- Page remains functional",,Performance Testing - Extended
+TC023,Page Load Performance - Fast 3G,Low,Performance,DevTools available,"1. Open DevTools and set network to Fast 3G
+2. Reload the page
+3. Monitor load times and performance
+4. Compare with normal network performance","- Page loads faster than Slow 3G
+- Performance is consistent
+- No performance degradation",,Performance Testing - Extended
+TC024,Memory Usage,Low,Performance,DevTools available,"1. Open DevTools Memory tab
+2. Take heap snapshot before page load
+3. Load the page
+4. Take heap snapshot after page load
+5. Compare memory usage","- Memory usage is reasonable
+- No memory leaks detected
+- Memory usage stabilizes after load",,Performance Testing - Extended
+TC025,SSL Certificate Validation,High,Security,Page is accessible,"1. Click on the lock icon in browser address bar
+2. Verify certificate details
+3. Check certificate expiration date
+4. Verify certificate issuer","- SSL certificate is valid
+- Certificate is not expired
+- Certificate is issued by trusted CA
+- Certificate matches the domain",,Security Testing - Extended
+TC026,Mixed Content Check,High,Security,Page is loaded,"1. Open browser console
+2. Check for mixed content warnings
+3. Verify all resources use HTTPS
+4. Check for any HTTP requests","- No mixed content warnings
+- All resources use HTTPS
+- No HTTP requests made
+- Security indicators remain active",,Security Testing - Extended
+TC027,Content Security Policy,Medium,Security,Page is loaded,"1. Open browser console
+2. Check for CSP violations
+3. Verify CSP headers are present
+4. Test if inline scripts are blocked","- No CSP violations in console
+- CSP headers are properly configured
+- Inline scripts are blocked if not allowed
+- Security policies are enforced",,Security Testing - Extended
+TC028,XSS Protection,High,Security,Page is accessible,"1. Check if X-XSS-Protection header is present
+2. Verify XSS protection is enabled
+3. Test with potential XSS payloads in URL
+4. Check browser's built-in XSS protection","- X-XSS-Protection header is present
+- XSS protection is enabled
+- Browser blocks potential XSS attacks
+- No XSS vulnerabilities detected",,Security Testing - Extended
+TC029,Color Contrast,Medium,Accessibility,Page is loaded,"1. Use browser extension or DevTools to check color contrast
+2. Verify text meets WCAG AA standards (4.5:1)
+3. Check button text contrast
+4. Verify logo contrast against background","- Text meets WCAG AA contrast requirements
+- Button text is clearly readable
+- Logo is visible against background
+- All text meets accessibility standards",,Accessibility Testing - Extended
+TC030,Focus Management,Medium,Accessibility,Page is loaded,"1. Use Tab key to navigate
+2. Verify focus is visible on all interactive elements
+3. Check if focus is trapped appropriately
+4. Verify focus order is logical","- Focus is clearly visible on all elements
+- Focus is not trapped inappropriately
+- Tab order follows logical sequence
+- Focus indicators meet accessibility standards",,Accessibility Testing - Extended
+TC031,ARIA Labels,Medium,Accessibility,Page is loaded,"1. Inspect page elements for ARIA labels
+2. Verify button has appropriate role
+3. Check if logo has alt text or aria-label
+4. Verify semantic HTML structure","- Interactive elements have appropriate ARIA labels
+- Button has proper role attribute
+- Logo has descriptive alt text or aria-label
+- HTML structure is semantic and accessible",,Accessibility Testing - Extended
+TC032,Google OAuth Integration,Critical,Integration,"Page is loaded and Google account available","1. Click ""Continue with Google"" button
+2. Verify redirect to Google OAuth page
+3. Complete Google sign-in process
+4. Verify successful authentication and redirect back","- Button redirects to Google OAuth page
+- Google sign-in process completes successfully
+- User is redirected back to application
+- Authentication state is properly maintained",,Integration Testing
+TC033,Google OAuth - Invalid Credentials,High,Integration,Page is loaded,"1. Click ""Continue with Google"" button
+2. Enter invalid Google credentials
+3. Verify error handling
+4. Check if user is returned to original page","- Invalid credentials are properly handled
+- Clear error message is displayed
+- User is returned to original page
+- No application crashes or errors",,Integration Testing
+TC034,Google OAuth - Cancelled Authentication,Medium,Integration,Page is loaded,"1. Click ""Continue with Google"" button
+2. Cancel the Google authentication process
+3. Verify user is returned to original page
+4. Check application state","- Cancelled authentication is handled gracefully
+- User is returned to original page
+- Application state remains unchanged
+- No errors or crashes occur",,Integration Testing
+TC035,Page Refresh During Google OAuth,Medium,Error Handling,Page is loaded,"1. Click ""Continue with Google"" button
+2. Refresh the page during OAuth process
+3. Verify error handling
+4. Check if user can retry authentication","- Page refresh during OAuth is handled gracefully
+- Clear error message is displayed
+- User can retry authentication
+- No application state corruption",,Edge Cases and Error Scenarios
+TC036,Browser Back Button During OAuth,Medium,Error Handling,Page is loaded,"1. Click ""Continue with Google"" button
+2. Use browser back button during OAuth process
+3. Verify error handling
+4. Check if user can retry authentication","- Browser back button is handled gracefully
+- Clear error message is displayed
+- User can retry authentication
+- No application state corruption",,Edge Cases and Error Scenarios
+TC037,Multiple Tabs - Same Authentication,Low,Error Handling,Page is loaded,"1. Open page in multiple tabs
+2. Start Google OAuth in one tab
+3. Try to start OAuth in another tab
+4. Verify behavior and error handling","- Multiple OAuth attempts are handled appropriately
+- Clear error messages are displayed
+- No authentication conflicts occur
+- Application remains stable",,Edge Cases and Error Scenarios
+TC038,Network Interruption During OAuth,Medium,Error Handling,Page is loaded,"1. Click ""Continue with Google"" button
+2. Interrupt network connection during OAuth
+3. Verify error handling
+4. Check if user can retry authentication","- Network interruption is handled gracefully
+- Clear error message is displayed
+- User can retry authentication
+- No application crashes occur",,Edge Cases and Error Scenarios
+TC039,Language Support - English,High,Localization,Page is loaded,"1. Verify page displays in English
+2. Check if text is properly localized
+3. Verify button text is in English
+4. Check for any language-specific issues","- Page displays in English
+- All text is properly localized
+- Button text is in English
+- No language-specific issues",,Localization and Internationalization
+TC040,Character Encoding,Medium,Localization,Page is loaded,"1. Check page source for proper character encoding
+2. Verify special characters display correctly
+3. Check for any encoding issues
+4. Verify UTF-8 encoding is used","- Page uses proper character encoding
+- Special characters display correctly
+- No encoding issues detected
+- UTF-8 encoding is used",,Localization and Internationalization
+TC041,Browser Bookmarks,Low,Browser Integration,Page is loaded,"1. Bookmark the page
+2. Verify bookmark works correctly
+3. Check if bookmark title is appropriate
+4. Verify bookmark icon (favicon) is displayed","- Page can be bookmarked successfully
+- Bookmark title is descriptive
+- Favicon is displayed in bookmarks
+- Bookmark works across browser sessions",,Browser-Specific Features
+TC042,Browser History,Low,Browser Integration,Page is loaded,"1. Navigate to the page
+2. Check browser history
+3. Verify page appears in history
+4. Test back/forward navigation","- Page appears in browser history
+- Back/forward navigation works correctly
+- History entry has appropriate title
+- No duplicate history entries",,Browser-Specific Features
+TC043,Print Functionality,Low,Browser Integration,Page is loaded,"1. Use browser print function (Ctrl+P)
+2. Verify print preview displays correctly
+3. Check if page is printable
+4. Verify print layout is appropriate","- Print preview displays correctly
+- Page is printable
+- Print layout is appropriate
+- No print-specific errors",,Browser-Specific Features
+TC044,Touch Gestures,Medium,Mobile Functionality,Page is loaded on touch device,"1. Test single tap on Google sign-in button
+2. Test double tap behavior
+3. Test pinch-to-zoom functionality
+4. Test swipe gestures","- Single tap activates button correctly
+- Double tap doesn't interfere with functionality
+- Pinch-to-zoom works appropriately
+- Swipe gestures don't interfere with page",,Mobile-Specific Testing
+TC045,Mobile Keyboard,Low,Mobile Functionality,Page is loaded on mobile device,"1. Focus on any input fields (if present)
+2. Verify mobile keyboard appears correctly
+3. Test keyboard input functionality
+4. Check keyboard dismissal","- Mobile keyboard appears correctly
+- Input functionality works as expected
+- Keyboard dismisses appropriately
+- No keyboard-related issues",,Mobile-Specific Testing
+TC046,Mobile Network Switching,Medium,Mobile Functionality,Page is loaded on mobile device,"1. Switch between WiFi and mobile data
+2. Verify page remains functional
+3. Check for any network-related errors
+4. Test page reload after network switch","- Page remains functional after network switch
+- No network-related errors occur
+- Page reloads successfully
+- Application handles network changes gracefully",,Mobile-Specific Testing
+TC047,Privacy Policy Compliance,Medium,Compliance,Page is accessible,"1. Check for privacy policy link
+2. Verify privacy policy is accessible
+3. Check for cookie policy information
+4. Verify GDPR compliance indicators","- Privacy policy is accessible
+- Cookie policy information is provided
+- GDPR compliance indicators are present
+- Privacy information is up-to-date",,Security and Privacy
+TC048,Cookie Management,Medium,Security,Page is loaded,"1. Check browser cookie storage
+2. Verify only necessary cookies are set
+3. Check cookie expiration settings
+4. Verify secure cookie flags","- Only necessary cookies are set
+- Cookies have appropriate expiration
+- Secure flags are set where appropriate
+- No unnecessary tracking cookies",,Security and Privacy
+TC049,Third-Party Scripts,Medium,Security,Page is loaded,"1. Check for third-party scripts
+2. Verify scripts are from trusted sources
+3. Check for analytics or tracking scripts
+4. Verify script loading behavior","- Only necessary third-party scripts are loaded
+- Scripts are from trusted sources
+- Analytics scripts are properly configured
+- No suspicious or unauthorized scripts",,Security and Privacy
+TC050,Image Optimization,Medium,Performance,Page is loaded,"1. Check image file sizes
+2. Verify appropriate image formats are used
+3. Check for lazy loading implementation
+4. Verify responsive images","- Images are appropriately sized
+- Modern image formats are used (WebP, AVIF)
+- Lazy loading is implemented where appropriate
+- Responsive images are used",,Performance and Optimization
+TC051,CSS and JavaScript Optimization,Medium,Performance,Page is loaded,"1. Check CSS and JS file sizes
+2. Verify minification is implemented
+3. Check for unused CSS/JS
+4. Verify bundling and compression","- CSS and JS files are minified
+- No unused code is loaded
+- Files are properly bundled
+- Compression is implemented",,Performance and Optimization
+TC052,Caching Implementation,Low,Performance,Page is loaded,"1. Check HTTP cache headers
+2. Verify static assets are cached
+3. Test cache expiration settings
+4. Verify cache invalidation","- Appropriate cache headers are set
+- Static assets are cached
+- Cache expiration is reasonable
+- Cache invalidation works correctly",,Performance and Optimization
+TC053,Analytics Implementation,Low,Analytics,Page is loaded,"1. Check for analytics scripts
+2. Verify tracking code is present
+3. Test analytics data collection
+4. Verify privacy compliance","- Analytics scripts are properly loaded
+- Tracking code is functional
+- Data collection works correctly
+- Privacy compliance is maintained",,Analytics and Monitoring
+TC054,Error Monitoring,Low,Monitoring,Page is loaded,"1. Check for error monitoring scripts
+2. Verify error reporting functionality
+3. Test error capture
+4. Check error notification system","- Error monitoring is implemented
+- Errors are captured and reported
+- Error notifications work correctly
+- Error data is properly formatted",,Analytics and Monitoring
+TC055,WCAG 2.1 AA Compliance,High,Compliance,Page is loaded,"1. Use automated accessibility testing tools
+2. Verify WCAG 2.1 AA compliance
+3. Check for accessibility violations
+4. Verify remediation of issues","- Page meets WCAG 2.1 AA standards
+- No critical accessibility violations
+- Issues are properly remediated
+- Accessibility score is above 90%",,Compliance and Standards
+TC056,Section 508 Compliance,Medium,Compliance,Page is accessible,"1. Check Section 508 compliance
+2. Verify accessibility requirements are met
+3. Test with assistive technologies
+4. Verify keyboard navigation compliance","- Page meets Section 508 requirements
+- Accessibility requirements are satisfied
+- Assistive technologies work correctly
+- Keyboard navigation is fully functional",,Compliance and Standards
+TC057,GDPR Compliance,Medium,Compliance,Page is accessible,"1. Check for GDPR compliance indicators
+2. Verify consent mechanisms
+3. Check data processing information
+4. Verify user rights information","- GDPR compliance indicators are present
+- Consent mechanisms are implemented
+- Data processing information is provided
+- User rights are clearly explained",,Compliance and Standards
+TC058,High Traffic Simulation,Low,Stress Testing,Page is accessible,"1. Simulate high concurrent users
+2. Monitor page performance under load
+3. Check for any performance degradation
+4. Verify system stability","- Page performs well under high load
+- No significant performance degradation
+- System remains stable
+- Response times remain acceptable",,Stress Testing
+TC059,Memory Leak Testing,Low,Stress Testing,Page is accessible,"1. Monitor memory usage over time
+2. Perform repeated page interactions
+3. Check for memory leaks
+4. Verify memory cleanup","- No memory leaks detected
+- Memory usage remains stable
+- Proper cleanup occurs
+- No memory-related crashes",,Stress Testing
+TC060,Previous Bug Verification,High,Regression,Known previous issues documented,"1. Test previously reported bugs
+2. Verify fixes are working
+3. Check for regression issues
+4. Verify no new issues introduced","- Previously reported bugs are fixed
+- No regression issues found
+- No new issues introduced
+- All fixes are working correctly",,Regression Testing

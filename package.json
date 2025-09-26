@@ -11,7 +11,18 @@
     "test:report": "playwright show-report",
     "test:install": "playwright install",
     "test:codegen": "playwright codegen",
-    "test:install-deps": "playwright install --with-deps"
+    "test:install-deps": "playwright install --with-deps",
+    "test:simple": "playwright test tests/simple.spec.js --project=chromium",
+    "test:ci-friendly": "playwright test tests/ci-friendly.spec.js --project=chromium",
+    "test:smoke": "playwright test tests/SmokeSuite/smokeTesting.spec.js --project=chromium",
+    "test:tool-validation": "playwright test tests/ToolValidation/toolValidation.spec.js --project=chromium",
+    "test:all": "playwright test --project=chromium",
+    "test:parallel": "playwright test --project=chromium --workers=4",
+    "test:staging": "STAGE_ENV=https://staging.ai.future.works/ playwright test --project=chromium",
+    "test:production": "STAGE_ENV=https://ai.future.works/ playwright test --project=chromium",
+    "ci:lint": "node -c playwright.config.js",
+    "ci:install": "npm ci && npx playwright install --with-deps chromium",
+    "ci:test": "npm run ci:install && npm run test:all"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +31,8 @@
   "devDependencies": {
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.1.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
   }
 }

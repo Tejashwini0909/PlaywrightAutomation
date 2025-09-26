@@ -1,14 +1,16 @@
 # CI/CD Integration Guide - Playwright Automation
 
-This document describes the CI/CD pipeline setup for the Playwright automation project.
+This document describes the comprehensive CI/CD pipeline setup for the Playwright automation project.
 
 ## 🚀 Overview
 
-The project is integrated with GitHub Actions to provide:
+The project is integrated with both **GitHub Actions** and **Jenkins** to provide:
 - **Automated Testing**: Runs all test suites on every push and pull request
 - **Continuous Integration**: Validates code quality and test results
 - **Continuous Deployment**: Automated deployment to staging and production environments
 - **Quality Gates**: Ensures all tests pass before deployment
+- **Multi-Platform Support**: Works on both GitHub Actions and Jenkins
+- **Flexible Execution**: Support for individual test suites or full test runs
 
 ## 📋 Workflow Files
 
@@ -125,19 +127,78 @@ The project is integrated with GitHub Actions to provide:
 ## 🛠️ Local Development
 
 ### Running Tests Locally
+
+#### Using NPM Scripts
 ```bash
 # Run all tests
 npm test
 
-# Run specific test suite
-npm test -- tests/SmokeSuite/smokeTesting.spec.js
+# Run specific test suites
+npm run test:simple
+npm run test:ci-friendly
+npm run test:smoke
+npm run test:tool-validation
+npm run test:all
 
-# Run with UI
+# Run with different options
+npm run test:headed
 npm run test:ui
+npm run test:parallel
+
+# Run against different environments
+npm run test:staging
+npm run test:production
+```
+
+#### Using Test Execution Scripts
+
+**Linux/macOS:**
+```bash
+# Run all tests
+./scripts/run-tests.sh
+
+# Run specific test suite
+./scripts/run-tests.sh --suite smoke --env staging
+
+# Run with parallel execution
+./scripts/run-tests.sh --suite all --parallel --verbose
 
 # Run in headed mode
-npm run test:headed
+./scripts/run-tests.sh --suite smoke --headless false
+
+# Get help
+./scripts/run-tests.sh --help
 ```
+
+**Windows:**
+```cmd
+REM Run all tests
+scripts\run-tests.bat
+
+REM Run specific test suite
+scripts\run-tests.bat --suite smoke --env staging
+
+REM Run with parallel execution
+scripts\run-tests.bat --suite all --parallel --verbose
+
+REM Run in headed mode
+scripts\run-tests.bat --suite smoke --headless false
+
+REM Get help
+scripts\run-tests.bat --help
+```
+
+#### Test Execution Options
+
+| Option | Description | Values |
+|--------|-------------|---------|
+| `--suite` | Test suite to run | `all`, `simple`, `ci-friendly`, `smoke`, `tool-validation` |
+| `--env` | Environment to test | `staging`, `production` |
+| `--browser` | Browser to use | `chromium`, `firefox`, `webkit` |
+| `--headless` | Run in headless mode | `true` (default), `false` |
+| `--parallel` | Run tests in parallel | `true`, `false` |
+| `--report` | Generate HTML report | `true` (default), `false` |
+| `--verbose` | Verbose output | `true`, `false` |
 
 ### Pre-commit Validation
 ```bash

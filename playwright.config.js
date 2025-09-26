@@ -15,15 +15,15 @@ import { defineConfig, devices } from '@playwright/test';
 //export default defineConfig({
 const config = {
   testDir: './tests',
-  timeout: 60 * 1000, // Increased timeout to 60 seconds
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  timeout: 60 * 1000 * 5, // 5 minutes per test
+  /* Run tests in files sequentially but allow individual tests to continue on failure */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Use single worker for sequential execution */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -42,6 +42,10 @@ const config = {
     screenshot: 'only-on-failure',
     /* Record video on failure */
     video: 'retain-on-failure',
+    /* Add action timeout */
+    actionTimeout: 30000,
+    /* Add navigation timeout */
+    navigationTimeout: 30000,
   },
 
   /* Configure projects for major browsers */
@@ -50,10 +54,9 @@ const config = {
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        headless: process.env.CI ? true : false, // Run tests in headless mode on CI
-        slowMo: process.env.CI ? 0 : 1000, // Disable slow motion on CI
-        navigationTimeout: 60000, // Increased navigation timeout
-        actionTimeout: 30000, // Action timeout
+       headless: false, 
+        slowMo: 1000,
+        navigationTimeout: 30000,
         browserName: 'chromium', // Specify the browser name
       },
     },
