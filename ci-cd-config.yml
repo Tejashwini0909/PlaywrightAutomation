@@ -211,7 +211,7 @@ resources:
 # Schedule Configuration
 schedule:
   daily_tests:
-    cron: "0 9 * * *"  # 9:00 AM UTC (2:30 PM IST)
+    cron: "30 5 * * *"  # 5:30 AM UTC (11:00 AM IST)
     timezone: "UTC"
     test_suites: ["all"]
     

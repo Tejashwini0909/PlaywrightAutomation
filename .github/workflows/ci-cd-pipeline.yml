@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [ main, develop ]
   schedule:
-    # Run daily at 9:00 AM UTC (2:30 PM IST)
-    - cron: '0 9 * * *'
+    # Run daily at 5:30 AM UTC (11:00 AM IST)
+    - cron: '30 5 * * *'
   workflow_dispatch:
     inputs:
       test_suite:
