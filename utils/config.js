@@ -55,7 +55,7 @@ export class TimeoutConfig {
  */
 export class EnvConfig {
     static get STAGE_ENV() {
-        return process.env.STAGE_ENV || 'https://staging.ai.future.works/';
+        return process.env.STAGE_ENV || 'https://ai.future.works/';
     }
 
     static get QA_USERNAME() {

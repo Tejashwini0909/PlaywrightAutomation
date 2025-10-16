@@ -57,8 +57,14 @@ export class LoginPage {
             await this.btnNext.click();
             console.log('✅ Clicked Next after password');
             
-            // Wait for login to complete
-            await this.page.waitForLoadState('networkidle', { timeout: 15000 });
+            // Wait for login to complete - use load state and URL check instead of networkidle
+            await this.page.waitForLoadState('load', { timeout: 15000 });
+            
+            // Wait for navigation to complete and verify we're on the app (not on Google's login page)
+            //await this.page.waitForURL('**/ai.future.works/**', { timeout: 15000 });
+            
+            // Additional wait to ensure the page is interactive
+            await this.page.waitForTimeout(2000);
             console.log('✅ Login completed successfully');
             
         } catch (error) {

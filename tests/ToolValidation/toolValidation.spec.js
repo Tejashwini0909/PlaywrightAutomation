@@ -30,7 +30,7 @@ test.describe('FW Tests', () => {
     await toolValidationpageObject.runclickupTaskAndVerify('Tell me the details of 868ffdcnu', 'task', 3);
   });
   test('TC_05 - Verify GPT-5 module validation with tool is autoReasoningTool', async ({ page }) => {
-    await toolValidationpageObject.selectModule('gemini-2.5-pro');
+    await toolValidationpageObject.selectModule('gemini-2.5-pro');    
     await toolValidationpageObject.runautoReasoningToolAndVerify('Ingest all the tasks for Tejashwini', 'Tejashwini', 3);
   });
  test('TC_06 - Verify GPT-5 module Space/List/Folder selection (Checkbox and Uncheckbox)', async ({ page }) => {

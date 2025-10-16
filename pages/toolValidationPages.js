@@ -1,5 +1,5 @@
 
-import { Page, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { TimeoutConfig } from '../utils/config.js';
 
 export class toolValidationPages {
@@ -13,16 +13,18 @@ export class toolValidationPages {
         this.iptEmail = page.locator("//input[@aria-label='Email or phone']");
         this.btnNext = page.locator("(//span[text() = 'Next'])[last()]");
         this.iptPassword = page.locator("//input[@aria-label='Enter your password']");
-        this.moduleDrpDown = page.locator("(//button[@aria-haspopup='menu'])[last()]");
-        this.messageBox = page.locator("//textarea[@placeholder ='Send a message...']");
-        this.messageSend = page.locator("//div[contains(@class, 'justify-end')]");
+        this.moduleDrpDown = page.locator("(//header//ul[@data-sidebar='menu']//following-sibling::button)[1]");
+        this.messageBox = page.locator("//textarea[@placeholder ='Send a message...' or @placeholder = 'Ask anything']");
+        this.messageSend = page.locator("//textarea[@placeholder ='Send a message...' or @placeholder = 'Ask anything']//parent::div//following-sibling::button");
         this.stopbtn = page.locator("//div[contains(@class, 'justify-end')]//*[@fill-rule='evenodd' and @clip-rule='evenodd' ]");
         this.assistantContainer = page.locator("//div[@data-role='assistant']");
         this.waitAssistantContainer = page.locator("(//div[@data-role='assistant']//p)[last()]");
-        this.settingIcon = page.locator("//form//button[@data-state='closed']");
-        this.select_webSearch = page.locator("//button[text() = 'Web Search']");
-        this.select_deepSearch = page.locator("//button[text() = 'Deep Search']");
-        this.select_CU_Direct_Ingestion = page.locator("//button[text() = 'CU Direct Ingestion']");
+        this.settingIcon = page.locator("//input[@id='file-input']//parent::div//button[@data-state='closed']");
+        this.select_webSearch = page.locator("//div[text() = ' Web Search']");
+        this.select_addPhotos = page.locator('text="Add photos & files"');
+        this.select_more = page.locator("//div[text() = 'More']");
+        this.select_deepSearch = page.locator("//div[text() = ' Deep Research']");
+        this.select_CU_Direct_Ingestion = page.locator("//div[text() = ' CU Direct Ingestion']");
         this.futureWorksChkbox = page.locator("//span[text() = 'Future Works']//following-sibling::button");
         this.thinkingTxt = page.locator("//div[text() = 'Thinking...']");
         this.toolUsedName = page.locator("(//div[text() = 'Tool used: '])[last()]");
@@ -37,13 +39,13 @@ export class toolValidationPages {
         
         // Checkbox locators for validation
         this.specificCheckbox = page.locator("//span[text() = 'Future Works']//parent::div//button[@role='checkbox']");
-        this.allCheckboxes = page.locator("//button[@role='checkbox']");
+        this.allCheckboxes = page.locator("//button[@role='checkbox' and @aria-checked='true']");
         this.checkedCheckboxes = page.locator("//button[@role='checkbox' and @aria-checked='true']");
         this.uncheckedCheckboxes = page.locator("//button[@role='checkbox' and @aria-checked='false']");
         
         // File upload locators
-        this.fileUploadButton = page.locator("(//form//textarea//following-sibling::div//button)[1]");
-        this.fileUploadSuccessMessage = page.locator("//div[text() = 'File(s) uploaded successfully!']");
+        //this.fileUploadButton = page.locator("(//form//textarea//following-sibling::div//button)[1]");
+       // this.fileUploadSuccessMessage = page.locator("//div[text() = 'File(s) uploaded successfully!']");
         
         // Banner locators for context selection
         this.contextBanner = page.locator("//span[contains(text(), 'Select context to work')]");
@@ -95,7 +97,7 @@ export class toolValidationPages {
                 await this.page.waitForTimeout(1000);
                 console.log(` Section ${sectionName} ${shouldCheck ? 'checked' : 'unchecked'}`);
             } else {
-                console.log(`ℹ️ Section ${sectionName} already ${shouldCheck ? 'checked' : 'unchecked'}`);
+                console.log(`ℹSection ${sectionName} already ${shouldCheck ? 'checked' : 'unchecked'}`);
             }
             
             // If checking, also expand the section to see sub-items
@@ -106,7 +108,7 @@ export class toolValidationPages {
                 if (!isExpanded) {
                     await expandButton.click();
                     await this.page.waitForTimeout(500);
-                    console.log(`📂 Section ${sectionName} expanded`);
+                    console.log(`Section ${sectionName} expanded`);
                 }
             }
             
@@ -321,6 +323,7 @@ export class toolValidationPages {
     async selectWebSearchToolSetting() {
         await this.settingIcon.waitFor({ state: 'visible' });
         await this.settingIcon.click();
+        await this.select_more.click();
         await this.select_webSearch.click();
         await this.page.waitForTimeout(2000);
     }
@@ -347,6 +350,7 @@ export class toolValidationPages {
                 // Select Web Search tool
                 await this.settingIcon.waitFor({ state: 'visible' });
                 await this.settingIcon.click();
+                await this.select_more.click();
                 await this.select_webSearch.click();
                 await this.page.waitForTimeout(2000);
 
@@ -376,6 +380,9 @@ export class toolValidationPages {
             } catch (error) {
                 lastError = error;
                 if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
                     await this.page.waitForTimeout(1000); // Wait before retrying
                 }
             }
@@ -424,6 +431,9 @@ export class toolValidationPages {
             } catch (error) {
                 lastError = error;
                 if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
                     await this.page.waitForTimeout(1000); // Wait before retrying
                 }
             }
@@ -468,6 +478,9 @@ export class toolValidationPages {
             } catch (error) {
                 lastError = error;
                 if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
                     await this.page.waitForTimeout(1000); // Wait before retrying
                 }
             }
@@ -510,6 +523,9 @@ export class toolValidationPages {
             } catch (error) {
                 lastError = error;
                 if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
                     await this.page.waitForTimeout(1000); // Wait before retrying
                 }
             }
@@ -527,6 +543,7 @@ export class toolValidationPages {
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
                 // Send message
+                await this.selectCUDirectIngestionToolSetting();
                 await this.messageBox.waitFor({ state: 'visible' });
                 await this.messageBox.fill(message);
                 await this.messageSend.click();
@@ -552,6 +569,9 @@ export class toolValidationPages {
             } catch (error) {
                 lastError = error;
                 if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
                     await this.page.waitForTimeout(1000); // Wait before retrying
                 }
             }
@@ -869,28 +889,40 @@ export class toolValidationPages {
     async uploadFileAndVerify(filePath, expectedFormat) {
         try {
             console.log(`📎 Uploading ${expectedFormat} file: ${filePath}`);
-            
-            // Wait for the file upload button to be visible
-            await this.fileUploadButton.waitFor({ state: 'visible', timeout: TimeoutConfig.DEFAULT_TIMEOUT });
-            
-            // Set the file for upload
-            await this.page.setInputFiles('input[type="file"]', filePath);
-            
+            // Select Web Search tool
+            await this.settingIcon.waitFor({ state: 'visible' });
+            await this.settingIcon.click();
+            // Look for the "Add photos & files" button directly in the interface (as shown in screenshot)
+            const addPhotosButton = this.page.locator('text="Add photos & files"').first();
+
+            // Wait for the button to be visible
+            await addPhotosButton.waitFor({ state: 'visible', timeout: this.getTimeout('default') });
+
+            // Handle file upload using file chooser event
+            const [fileChooser] = await Promise.all([
+                this.page.waitForEvent('filechooser'),
+                addPhotosButton.click()
+            ]);
+
+            // Set the file
+            await fileChooser.setFiles(filePath);
+            console.log('✅ File uploaded using file chooser');
+
             // Wait a moment for the file to be processed
             await this.page.waitForTimeout(2000);
-            
+
             // Verify the success message appears
-            await this.fileUploadSuccessMessage.waitFor({ 
-                state: 'visible', 
+            await this.fileUploadSuccessMessage.waitFor({
+                state: 'visible',
                 timeout: this.getTimeout('long')
             });
-            
+
             const successMessage = await this.fileUploadSuccessMessage.textContent();
             console.log(` File upload successful: ${successMessage}`);
-            
+
             // Additional verification - ensure the message contains expected text
             expect(successMessage).toContain('File(s) uploaded successfully!');
-            
+
             return true;
         } catch (error) {
             console.error(` Failed to upload ${expectedFormat} file:`, error.message);
