@@ -542,8 +542,8 @@ export class toolValidationPages {
         let lastError;
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
-                // Send message
                 await this.selectCUDirectIngestionToolSetting();
+                // Send message
                 await this.messageBox.waitFor({ state: 'visible' });
                 await this.messageBox.fill(message);
                 await this.messageSend.click();
