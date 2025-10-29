@@ -1,6 +1,7 @@
 {
   "name": "playwrightautomation",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
@@ -11,14 +12,16 @@
     "test:report": "playwright show-report",
     "test:install": "playwright install",
     "test:codegen": "playwright codegen",
-    "test:install-deps": "playwright install --with-deps"
+    "test:install-deps": "playwright install --with-deps",
+    "setup:session": "node utils/setupSession.js",
+    "test:session": "node utils/testSession.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.54.1",
+    "@playwright/test": "^1.55.0",
     "@types/node": "^24.1.0"
   },
   "dependencies": {

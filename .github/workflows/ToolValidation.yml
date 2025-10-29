@@ -1,4 +1,4 @@
-name: Playwright Smoke Test Suite
+name: Playwright Tool Validation
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run a single Playwright test
-        run: npx playwright test tests/SmokeSuite/smokeTesting.spec.js
+        run: npx playwright test tests/ToolValidation/toolValidation.spec.js
         env:
           LOGIN_METHOD: session
       - name: Publish Test Results

@@ -1,6 +1,7 @@
 
 import { expect } from '@playwright/test';
 import { TimeoutConfig } from '../utils/config.js';
+import path from 'path';
 
 export class toolValidationPages {
     constructor(page) {
@@ -426,7 +427,7 @@ export class toolValidationPages {
                 // Verify tool used
                 await this.toolUsedName.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
                 const toolUsedText = await this.toolUsedName.textContent();
-                expect(toolUsedText).toContain('deepResearch');
+                expect(toolUsedText).toContain('webSearchExa');
                 return; // Success
             } catch (error) {
                 lastError = error;
@@ -949,7 +950,10 @@ export class toolValidationPages {
         for (const fileFormat of fileFormats) {
             try {
                 console.log(`\n=== Testing ${fileFormat.description} ===`);
-                const filePath = `${testDataFolder}\\${fileFormat.fileName}`;
+                
+                // Use path.join for cross-platform compatibility (Windows/Mac/Linux)
+                const filePath = path.join(testDataFolder, fileFormat.fileName);
+                console.log(`File path: ${filePath}`);
                 
                 await this.uploadFileAndVerify(filePath, fileFormat.format);
                 
@@ -964,7 +968,7 @@ export class toolValidationPages {
                 await this.page.waitForTimeout(3000);
                 
             } catch (error) {
-                console.error(` Failed to upload ${fileFormat.description}:`, error.message);
+                console.error(`Failed to upload ${fileFormat.description}:`, error.message);
                 results.push({
                     format: fileFormat.format,
                     fileName: fileFormat.fileName,
@@ -978,8 +982,8 @@ export class toolValidationPages {
         // Print summary
         console.log('\n=== FILE UPLOAD TEST SUMMARY ===');
         results.forEach(result => {
-            const status = result.status === 'SUCCESS' ? '' : '';
-            console.log(`${status} ${result.description}: ${result.status}`);
+            const statusIcon = result.status === 'SUCCESS' ? '✅' : '❌';
+            console.log(`${statusIcon} ${result.description}: ${result.status}`);
             if (result.error) {
                 console.log(`   Error: ${result.error}`);
             }

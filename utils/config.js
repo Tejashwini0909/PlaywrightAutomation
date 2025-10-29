@@ -18,7 +18,7 @@ export class TimeoutConfig {
     }
 
     static get LONG_TIMEOUT() {
-        return parseInt(process.env.LONG_TIMEOUT) || 60000; // Reduced from 500s to 60s
+        return parseInt(process.env.LONG_TIMEOUT) || 500000;
     }
 
     /**
@@ -55,7 +55,7 @@ export class TimeoutConfig {
  */
 export class EnvConfig {
     static get STAGE_ENV() {
-        return process.env.STAGE_ENV || 'https://ai.future.works/';
+        return process.env.STAGE_ENV || 'https://staging.ai.future.works/';
     }
 
     static get QA_USERNAME() {

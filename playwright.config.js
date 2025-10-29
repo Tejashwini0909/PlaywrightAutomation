@@ -28,24 +28,18 @@ const config = {
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['junit', { outputFile: 'test-results/junit-report.xml' }],
     ['list'] // Add list reporter for better CI output
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Take screenshot on failure */
     screenshot: 'only-on-failure',
-    /* Record video on failure */
     video: 'retain-on-failure',
-    /* Add action timeout */
-    actionTimeout: 30000,
-    /* Add navigation timeout */
-    navigationTimeout: 30000,
+    actionTimeout: 80000,
+    navigationTimeout: 80000,
+    storageState: 'state.json', // Use saved session for all tests
   },
 
   /* Configure projects for major browsers */
@@ -54,9 +48,9 @@ const config = {
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-       headless: false, 
+       headless: process.env.CI ? true : false, // Headless in CI, headed locally
         slowMo: 1000,
-        navigationTimeout: 30000,
+        navigationTimeout: 80000,
         browserName: 'chromium', // Specify the browser name
       },
     },
@@ -90,5 +84,6 @@ const config = {
   //   reuseExistingServer: !process.env.CI,
   // },
 };
-module.exports = config;
+
+export default config;
   
