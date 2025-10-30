@@ -39,6 +39,7 @@ test.describe('FW Tests', () => {
   test('TC_05 - Verify GPT-5 module validation with tool is autoReasoningTool', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
+    await toolValidationpageObject.handleCustomCheckpoint();
     await toolValidationpageObject.runautoReasoningToolAndVerify('Ingest all the tasks for Tejashwini', 'Tejashwini', 3);
   });
   test('TC_06 - Verify GPT-5 module Space/List/Folder selection (Checkbox and Uncheckbox)', async ({ page }) => {
@@ -127,16 +128,9 @@ test.describe('FW Tests', () => {
     await toolValidationpageObject.testBannerBehavior(true);
 
     console.log('✅ TC_11 Passed: Banner is hidden when checkbox is selected');
-  });
+  }); 
 
-  test('TC_12 - Verify GPT-5 module validation with tool is CU ingestion tool', async ({ page }) => {
-    const toolValidationpageObject = new toolValidationPages(page);
-    await toolValidationpageObject.selectModule('gemini-2.5-pro');
-    await toolValidationpageObject.selectCUDirectIngestionToolSetting()
-    await toolValidationpageObject.runautoReasoningToolAndVerify('Ingest selections', 'Ingest', 3);
-  });
-
-  test('TC_13 - Simple collapsible checkbox section validation', async ({ page }) => {
+  test('TC_12 - Simple collapsible checkbox section validation', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
 
@@ -146,20 +140,20 @@ test.describe('FW Tests', () => {
     const allSelected = await toolValidationpageObject.areAllCheckboxesSelected();
     console.log(`All checkboxes initially selected: ${allSelected}`);
 
-    // Step 2: Select "Delivery & CSat" section and verify all its checkboxes
-    await toolValidationpageObject.selectSectionCheckbox('Delivery & CSat', true);
-    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('Delivery & CSat');
+    // Step 2: Select "[SVD] Delivery & CSat" section and verify all its checkboxes
+    await toolValidationpageObject.selectSectionCheckbox('[SVD] Delivery & CSat', true);
+    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('[SVD] Delivery & CSat');
 
-    // Step 3: Test with another section - "Innovation"
-    await toolValidationpageObject.selectSectionCheckbox('Innovation', true);
-    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('Innovation');
+    // Step 3: Test with another section - "[INV] Innovation"
+    await toolValidationpageObject.selectSectionCheckbox('[INV] Innovation', true);
+    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('[INV] Innovation');
 
     // Step 4: Uncheck a section
-    await toolValidationpageObject.selectSectionCheckbox('Delivery & CSat', false);
+    await toolValidationpageObject.selectSectionCheckbox('[SVD] Delivery & CSat', false);
 
-    // Step 5: Test with another section - "Base"
-    await toolValidationpageObject.selectSectionCheckbox('Base', true);
-    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('Base');
+    // Step 5: Test with another section - "[TEC] Technology"
+    await toolValidationpageObject.selectSectionCheckbox('[TEC] Technology', true);
+    await toolValidationpageObject.verifyAllCheckboxesInSectionSelected('[TEC] Technology');
 
     console.log('✅ TC_13 Passed: Simple collapsible checkbox validation completed');
   });

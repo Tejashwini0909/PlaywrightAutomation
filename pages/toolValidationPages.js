@@ -1,4 +1,3 @@
-
 import { expect } from '@playwright/test';
 import { TimeoutConfig } from '../utils/config.js';
 import path from 'path';
@@ -1084,6 +1083,38 @@ export class toolValidationPages {
         await this.select_CU_Direct_Ingestion.click();
         await this.page.waitForTimeout(2000);
     }
+    /**
+       * Custom checkpoint: Uncheck 'Future Works', expand '[SVD] Delivery & CSat', click 'MEH-5: AOS -  Veltris x FW', and check 'Sprint 9' checkbox
+       */
+    async handleCustomCheckpoint() {
+        // 1. Uncheck futureWorksChkbox if checked
+        await this.futureWorksChkbox.waitFor({ state: 'visible' });
+        const isChecked = await this.futureWorksChkbox.getAttribute('aria-checked');
+        const dataState = await this.futureWorksChkbox.getAttribute('data-state');
+        if (isChecked === 'true' || dataState === 'checked') {
+            await this.futureWorksChkbox.click();
+            await this.page.waitForTimeout(1000);
+        }
 
+        // 2. Expand [SVD] Delivery & CSat section if closed
+        const deliverySectionBtn = this.page.locator("//span[text() = '[SVD] Delivery & CSat']//ancestor::button[@data-state='closed']");
+        const deliverySectionCount = await deliverySectionBtn.count();
+        if (deliverySectionCount > 0) {
+            await deliverySectionBtn.first().click();
+            await this.page.waitForTimeout(1000);
+        }
+
+        // 3. Click 'MEH-5: AOS -  Veltris x FW'
+        const mehBtn = this.page.locator("//span[text() = 'MEH-5: AOS -  Veltris x FW']");
+        await mehBtn.waitFor({ state: 'visible' });
+        await mehBtn.click();
+        await this.page.waitForTimeout(1000);
+
+        // 4. Click checkbox for 'Sprint 9 (9/8 - 9/14)'
+        const sprint9Checkbox = this.page.locator("//span[text() = 'Sprint 9 (9/8 - 9/14)']//parent::div//following-sibling::button[@role='checkbox']");
+        await sprint9Checkbox.waitFor({ state: 'visible' });
+        await sprint9Checkbox.click();
+        await this.page.waitForTimeout(1000);
+    }
 }
 
