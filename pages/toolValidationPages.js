@@ -940,8 +940,9 @@ export class toolValidationPages {
             { format: 'PDF_SCAN', fileName: 'sample_scan.pdf', description: 'PDF (scan/OCR)' },
             { format: 'PNG', fileName: 'sample.png', description: 'PNG image' },
             { format: 'JPG', fileName: 'sample.jpg', description: 'JPG image' },
-           // { format: 'CSV', fileName: 'sample.csv', description: 'CSV spreadsheet' },
-            { format: 'XLSX', fileName: 'sample.xlsx', description: 'Excel spreadsheet' }
+            { format: 'CSV', fileName: 'sample.csv', description: 'CSV spreadsheet' },
+            { format: 'XLSX', fileName: 'sample.xlsx', description: 'Excel spreadsheet' },
+            { format: 'DOCX', fileName: 'sample.docx', description: 'Word document' }
         ];
 
         const results = [];

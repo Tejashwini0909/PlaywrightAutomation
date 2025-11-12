@@ -97,18 +97,27 @@ test.describe('FW Tests', () => {
     });
   });
 
-  test('TC_09 - Verify GPT-5 module Accepts and uses: PDF (text), PDF (scan/OCR), PNG/JPG, CSV/XLSX ≤50 MB; - 6 file formats', async ({ page }) => {
+  test('TC_09 - Verify GPT-5 module Accepts and uses: PDF (text), PDF (scan/OCR), PNG/JPG, CSV/XLSX ≤50 MB; - 7 file formats', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
 
-    // Test file upload functionality for all 6 supported formats
+    // Test file upload functionality for all 7 supported formats
     const testDataFolder = path.join(process.cwd(), 'TestData');
     const uploadResults = await toolValidationpageObject.testAllFileFormatsUpload(testDataFolder);
 
-    // Verify that at least some file formats were successfully uploaded
+    // Verify ALL file formats were successfully uploaded
     const successfulUploads = uploadResults.filter(result => result.status === 'SUCCESS');
-    expect(successfulUploads.length).toBeGreaterThan(0);
+    const failedUploads = uploadResults.filter(result => result.status === 'FAILED');
+    
     console.log(`✅ Successfully uploaded ${successfulUploads.length} out of ${uploadResults.length} file formats`);
+    
+    // Test should fail if ANY file format failed to upload
+    if (failedUploads.length > 0) {
+      console.log(`❌ Failed uploads: ${failedUploads.map(f => f.description).join(', ')}`);
+    }
+    
+    expect(successfulUploads.length).toBe(uploadResults.length);
+    expect(failedUploads.length).toBe(0);
   });
   test('TC_10 - Verify banner appears when checkbox is not selected', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
