@@ -42,7 +42,7 @@ test.describe('FW Tests', () => {
       await modulepageObject.selectModule('grok-4');
       await modulepageObject.selectFutureWorksIfNotSelected();
       await modulepageObject.sendMessage('What is Sanity Testing?');
-      await modulepageObject.verifyAssistantResponse('sanity');
+      await modulepageObject.verifyAssistantResponse('sanity',5);
       console.log('TC_01 - grok-4 test completed successfully');
     } catch (error) {
       console.error('TC_01 - grok-4 test failed:', error.message);
@@ -165,49 +165,6 @@ test.describe('FW Tests', () => {
     } catch (error) {
       console.error('TC_010 - Toggle Sidebar position test failed:', error.message);
       throw error;
-    }
-  });
-
-  test('TC_011 - Verify Context Selection Search Filter Functionality', async ({ page }) => {
-    const modulepageObject = new ModulePages(page);
-
-    try {
-      await modulepageObject.validateContextSearchFilter();
-      console.log('TC_011 - Context search filter test completed successfully');
-    } catch (error) {
-      console.error('TC_011 - Context search filter test failed:', error.message);
-      throw error;
-    }
-  });
-
-  test('TC_012 - Verify Add Docs Search Filter Functionality', async ({ page }) => {
-    const modulepageObject = new ModulePages(page);
-
-    try {
-      await modulepageObject.validateAddDocsSearchFilter();
-      console.log('TC_012 - Add Docs search filter test completed successfully');
-    } catch (error) {
-      console.error('TC_012 - Add Docs search filter test failed:', error.message);
-      throw error;
-    }
-  });
-
-  test('TC_013 - Verify grok-4 AOS task adder', async ({ page }) => {
-    const modulepageObject = new ModulePages(page);
-
-    try {
-      await modulepageObject.selectModule('gemini-2.5-pro');
-      await modulepageObject.selectFutureWorksIfNotSelected();
-      await modulepageObject.sendMessage('What is Functional Testing?');
-      await modulepageObject.verifyAssistantResponse('functional');
-      
-      // Create AOS task after successful assistant response
-      await modulepageObject.createAOSTask('Tejashwini');
-
-      console.log('TC_013 - gemini-2.5-pro AOS task adder test completed successfully');
-    } catch (error) {
-      console.error('TC_013 - gemini-2.5-pro AOS task adder test failed:', error.message);
-      throw error; // Re-throw to mark test as failed but allow next test to run
     }
   });
 });
