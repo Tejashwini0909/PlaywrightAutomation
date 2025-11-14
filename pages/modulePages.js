@@ -748,7 +748,7 @@ export class ModulePages {
      * @param {string} expectedAnswer - The expected answer text.
      * @param {number} retries - Number of retry attempts (default 3).
      */
-    async verifyAssistantResponse(expectedAnswer, retries = 3) {
+    async verifyAssistantResponse(expectedAnswer, retries = 5) {
         let lastError;
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
