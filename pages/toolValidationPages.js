@@ -53,7 +53,11 @@ export class toolValidationPages {
         
         // Simple collapsible checkbox locators
         this.allCollapsibleSections = page.locator("//div[contains(@class, 'overflow')]//div[@class = 'group/collapsible relative']");
-        
+        this.googleDriveCheckbox = page.locator("//label[text() = 'Google Drive']//parent::div//following-sibling::button");
+        this.DatabricksCheckbox = page.locator("//label[text() = 'Databricks Business Intelligence']//parent::div//following-sibling::button");
+        this.CanvasModeCheckbox = page.locator("//label[text() = 'Canvas Mode']//parent::div//following-sibling::button");
+        this.CUDirectIngestionCheckbox = page.locator("//label[text() = 'CU Direct Ingestion']//parent::div//following-sibling::button");
+
     }
 
     /**
@@ -209,7 +213,6 @@ export class toolValidationPages {
     }
 
     async selectModule(moduleName) {
-        await this.page.waitForLoadState('networkidle');
         // Click the dropdown button
         await this.page.waitForTimeout(4000);
         await this.moduleDrpDown.waitFor({ state: 'visible' });
@@ -223,6 +226,20 @@ export class toolValidationPages {
         await this.page.waitForTimeout(2000); // Wait for the module to be selected
         await this.futureWorksChkbox.waitFor({ state: 'visible' });
         await this.futureWorksChkbox.click();
+    }
+
+    async selectModuleWithOutFutureCheckbox(moduleName) {
+        // Click the dropdown button
+        await this.page.waitForTimeout(4000);
+        await this.moduleDrpDown.waitFor({ state: 'visible' });
+        await this.moduleDrpDown.hover();
+        await this.moduleDrpDown.click();
+        // Select the module by name
+        await this.page.waitForSelector(`//div[@role='menuitem']//span[text() = '${moduleName}']`, { state: 'visible' });
+        await this.page.waitForTimeout(1000); // Wait for the dropdown to be populated
+        await this.page.locator(`//div[@role='menuitem']//span[text() = '${moduleName}']`).hover();
+        await this.page.locator(`//div[@role='menuitem']//span[text() = '${moduleName}']`).click();
+        await this.page.waitForTimeout(2000); // Wait for the module to be selected        
     }
 
     async loginWithGoogle(email, password) {
@@ -1079,11 +1096,308 @@ export class toolValidationPages {
         }
     }
  async selectCUDirectIngestionToolSetting() {
-        await this.settingIcon.waitFor({ state: 'visible' });
-        await this.settingIcon.click();
-        await this.select_CU_Direct_Ingestion.click();
+        await this.CUDirectIngestionCheckbox.waitFor({ state: 'visible' });
+        //await this.settingIcon.click();
+        await this.CUDirectIngestionCheckbox.click();
         await this.page.waitForTimeout(2000);
     }
+
+    /**
+     * Select Google Drive tool setting
+     */
+    async selectGoogleDriveToolSetting() {
+        await this.googleDriveCheckbox.waitFor({ state: 'visible' });
+        await this.googleDriveCheckbox.click();
+        await this.page.waitForTimeout(2000);
+    }
+
+    /**
+     * Selects Google Drive tool, sends a message, waits for assistant response, and verifies 'driveSearchTool' tool is used, with retry.
+     * @param {string} message - The message to send.
+     * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runGoogleDriveSearchAndVerify(message, expectedAnswer, retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                // Select Google Drive tool
+                await this.selectGoogleDriveToolSetting();
+
+                // Send message
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden' });
+                await this.page.waitForTimeout(5000);
+
+                // Verify expected answer in assistant response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                const fullResponse = responseTexts.join(' ').trim();
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+
+                // Verify tool used
+                await this.toolUsedName.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const toolUsedText = await this.toolUsedName.textContent();
+                expect(toolUsedText).toContain('driveSearchTool');
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
+                    await this.page.waitForTimeout(1000); // Wait before retrying
+                }
+            }
+        }
+        throw lastError; // If all retries fail, throw the last error
+    }
+
+    /**
+     * Select Canvas Mode tool setting
+     */
+    async selectCanvasModeToolSetting() {
+        await this.CanvasModeCheckbox.waitFor({ state: 'visible' });
+        await this.CanvasModeCheckbox.click();
+        await this.page.waitForTimeout(2000);
+    }
+
+    /**
+     * Helper method to verify Canvas Mode tool used (createDocument, updateDocument, or getDocument)
+     * @param {string|Array<string>} expectedTools - Expected tool name(s) to verify
+     */
+    async verifyCanvasModeTool(expectedTools) {
+        await this.toolUsedName.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+        const toolUsedText = await this.toolUsedName.textContent();
+        
+        // Support both single string and array of strings
+        const toolsToCheck = Array.isArray(expectedTools) ? expectedTools : [expectedTools];
+        
+        const hasMatch = toolsToCheck.some(tool => toolUsedText.includes(tool));
+        expect(hasMatch, `Expected tool to contain one of [${toolsToCheck.join(', ')}] but got: "${toolUsedText}"`).toBeTruthy();
+        
+        console.log(` Tool verified: ${toolUsedText}`);
+    }
+
+    /**
+     * Canvas Mode - Create Document and verify 'createDocument' tool is used
+     * @param {string} message - The message to send.
+     * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runCanvasModeCreateDocumentAndVerify(message, expectedAnswer, retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                // Select Canvas Mode tool
+                await this.selectCanvasModeToolSetting();
+
+                // Send message
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(5000);
+
+                // Verify expected answer in assistant response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                const fullResponse = responseTexts.join(' ').trim();
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+
+                // Verify tool used
+                await this.verifyCanvasModeTool('createDocument');
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000);
+                    await this.page.waitForTimeout(1000);
+                }
+            }
+        }
+        throw lastError;
+    }
+
+    /**
+     * Canvas Mode - Update Document and verify 'updateDocument' tool is used
+     * @param {string} message - The message to send.
+     * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runCanvasModeUpdateDocumentAndVerify(message, expectedAnswer, retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                // Send message (Canvas Mode already selected from previous test)
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(5000);
+
+                // Verify expected answer in assistant response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                const fullResponse = responseTexts.join(' ').trim();
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+
+                // Verify tool used
+                await this.verifyCanvasModeTool('updateDocument');
+
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000);
+                    await this.page.waitForTimeout(1000);
+                }
+            }
+        }
+        throw lastError;
+    }
+
+    /**
+     * Canvas Mode - Get Document and verify 'getDocument' tool is used
+     * @param {string} message - The message to send.
+     * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runCanvasModeGetDocumentAndVerify(message, expectedAnswer, retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                // Send message (Canvas Mode already selected from previous test)
+                 // Select Canvas Mode tool
+                await this.selectCanvasModeToolSetting();
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(5000);
+
+                // Verify expected answer in assistant response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                const fullResponse = responseTexts.join(' ').trim();
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+
+                // Verify tool used
+                await this.verifyCanvasModeTool('getDocument');
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000);
+                    await this.page.waitForTimeout(1000);
+                }
+            }
+        }
+        throw lastError;
+    }
+
+    /**
+     * Canvas Mode - Complete Workflow: Create, Update, and Get Document in one method
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runCanvasModeCompleteWorkflow(retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                console.log('📝 Starting Canvas Mode Complete Workflow...');
+
+                // Step 1: Create Document
+                console.log('Step 1: Creating document...');
+                await this.selectCanvasModeToolSetting();
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill('Create a document about Mysore without asking title of the document and any other information?');
+                await this.messageSend.click();
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(25000);
+                
+                // Verify create response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                let responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                let fullResponse = responseTexts.join(' ').trim();
+                expect(fullResponse.toLowerCase()).toContain('mysore');
+                await this.verifyCanvasModeTool('createDocument');
+                console.log('✅ Step 1: Document created successfully');
+
+                // Step 2: Update Document
+                console.log('Step 2: Updating document...');
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill('Can you remove History from the document and update the document?');
+                await this.messageSend.click();
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(25000);
+                
+                // Verify update response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                fullResponse = responseTexts.join(' ').trim();
+                expect(fullResponse.toLowerCase()).toContain('update');
+                await this.verifyCanvasModeTool('updateDocument');
+                console.log('✅ Step 2: Document updated successfully');
+
+                // Step 3: Get Document
+                console.log('Step 3: Getting document...');
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill('Can I get the conclusion from the above document?');
+                await this.messageSend.click();
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(25000);
+                
+                // Verify get response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                fullResponse = responseTexts.join(' ').trim();
+                expect(fullResponse.toLowerCase()).toContain('conclusion');
+                await this.verifyCanvasModeTool('getDocument');
+                console.log('✅ Step 3: Document retrieved successfully');
+
+                console.log('✅ Canvas Mode Complete Workflow finished successfully!');
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`❌ Attempt ${attempt} failed: ${error.message}`);
+                    console.log('🔄 Refreshing page and retrying...');
+                    await this.page.reload();
+                    await this.page.waitForTimeout(3000);
+                }
+            }
+        }
+        throw lastError;
+    }
+
     /**
        * Custom checkpoint: Uncheck 'Future Works', expand '[SVD] Delivery & CSat', click 'MEH-5: AOS -  Veltris x FW', and check 'Sprint 9' checkbox
        */
@@ -1116,6 +1430,64 @@ export class toolValidationPages {
         await sprint9Checkbox.waitFor({ state: 'visible' });
         await sprint9Checkbox.click();
         await this.page.waitForTimeout(1000);
+    }
+
+    /**
+     * Select Databricks Business Intelligence tool setting
+     */
+    async selectDatabricksToolSetting() {
+        await this.DatabricksCheckbox.waitFor({ state: 'visible' });
+        await this.DatabricksCheckbox.click();
+        await this.page.waitForTimeout(2000);
+    }
+
+    /**
+     * Selects Databricks Business Intelligence tool, sends a message, waits for assistant response, and verifies 'dataBricksBusinessIntelligence' tool is used, with retry.
+     * @param {string} message - The message to send.
+     * @param {string} expectedAnswer - The expected answer text.
+     * @param {number} retries - Number of retry attempts (default 3).
+     */
+    async runDatabricksAndVerify(message, expectedAnswer, retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                // Select Databricks tool
+                await this.selectDatabricksToolSetting();
+
+                // Send message
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden' });
+                await this.page.waitForTimeout(5000);
+
+                // Verify expected answer in assistant response
+                await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const responseTexts = await this.assistantContainer.locator('h1, h2, p,li').allTextContents();
+                const fullResponse = responseTexts.join(' ').trim();
+                const expectedWords = expectedAnswer.toLowerCase().split(' ');
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = expectedWords.some(word => responseLower.includes(word));
+                expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+
+                // Verify tool used
+                await this.toolUsedName.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                const toolUsedText = await this.toolUsedName.textContent();
+                expect(toolUsedText).toContain('databricksBussinessIntelligence');
+                return; // Success
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`Attempt ${attempt} failed, refreshing page and retrying...`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(2000); // Wait for page to load after refresh
+                    await this.page.waitForTimeout(1000); // Wait before retrying
+                }
+            }
+        }
+        throw lastError; // If all retries fail, throw the last error
     }
 }
 
