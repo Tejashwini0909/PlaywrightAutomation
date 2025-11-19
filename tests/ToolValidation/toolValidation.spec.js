@@ -137,7 +137,7 @@ test.describe('FW Tests', () => {
     await toolValidationpageObject.testBannerBehavior(true);
 
     console.log('✅ TC_11 Passed: Banner is hidden when checkbox is selected');
-  }); 
+  });
 
   test('TC_12 - Simple collapsible checkbox section validation', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
@@ -166,5 +166,49 @@ test.describe('FW Tests', () => {
 
     console.log('✅ TC_13 Passed: Simple collapsible checkbox validation completed');
   });
+  test('TC_13 - Verify GPT-5 module validation with tool is driveSearchTool', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+    await toolValidationpageObject.runGoogleDriveSearchAndVerify('Can you read the document "Playwright: An Overview" from Google Drive?', 'Playwright', 3);
+  });
+
+  test('TC_14 - Verify GPT-5 module validation with tool is driveSearchTool using Google Docs URL', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+    await toolValidationpageObject.runGoogleDriveSearchAndVerify('https://docs.google.com/document/d/1AFh5P-A04PMyX0LMwdxmMGLi_sKuQ6ze/edit#heading=h.jpyal7cu2z9b', 'document', 3);
+  });
+
+  test('TC_15 - Verify GPT-5 module validation with Google Docs URL without checkbox selection', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+
+    // Send URL directly without selecting Google Drive checkbox
+    await toolValidationpageObject.sendMessage('https://docs.google.com/document/d/1AFh5P-A04PMyX0LMwdxmMGLi_sKuQ6ze/edit#heading=h.jpyal7cu2z9b');
+
+    // Wait for assistant response
+    await toolValidationpageObject.thinkingTxt.waitFor({ state: 'hidden' });
+    await page.waitForTimeout(5000);
+
+    // Verify response contains document-related content
+    await toolValidationpageObject.waitAssistantContainer.waitFor({ state: 'visible', timeout: 60000 });
+    const responseTexts = await toolValidationpageObject.assistantContainer.locator('h1, h2, p, li').allTextContents();
+    const fullResponse = responseTexts.join(' ').trim();
+
+    expect(fullResponse.length).toBeGreaterThan(0);
+    console.log('✅ TC_15 Passed: URL processed without Google Drive checkbox selection');
+  });
+
+  test('TC_16 - Verify Canvas Mode - Create, update and Get Document with Canvas Mode tool', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+    await toolValidationpageObject.runCanvasModeCompleteWorkflow(3);
+  });
+
+  test('TC_17 - Verify GPT-5 module validation with Databricks Business Intelligence tool', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+    await toolValidationpageObject.runDatabricksAndVerify('Can I get my last week tasks?', 'tasks', 5);
+  });
 
 });
+
