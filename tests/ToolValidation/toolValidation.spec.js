@@ -16,33 +16,33 @@ test.describe('FW Tests', () => {
     }
   });
 
-  test('TC_01 - Verify GPT-5 module validation with tool is Web Search', async ({ page }) => {
+  test('TC_01 - Verify validation with tool is Web Search', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
     await toolValidationpageObject.runWebSearchAndVerify('tell me the latest tourist attractions to visit in italy', 'visit in Italy', 3);
   });
-  test('TC_02 - Verify GPT-5 module validation with tool is Deep Search', async ({ page }) => {
+  test('TC_02 - Verify validation with tool is Deep Search', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
     await toolValidationpageObject.runDeepSearchAndVerify('can you tell me latest methods to handle hallucinations in gen ai', 'hallucinations', 3);
   });
-  test('TC_03 - Verify GPT-5 module validation with tool is findRelavantContent', async ({ page }) => {
+  test('TC_03 - Verify validation with tool is findRelavantContent', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
     await toolValidationpageObject.runfindRelavantContentAndVerify('Whats the current sprint of veltris?', 'sprint of veltris', 3);
   });
-  test('TC_04 - Verify GPT-5 module validation with tool is clickupTask', async ({ page }) => {
+  test('TC_04 - Verify validation with tool is clickupTask', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
     await toolValidationpageObject.runclickupTaskAndVerify('Tell me the details of 868ffdcnu', 'task', 3);
   });
-  test('TC_05 - Verify GPT-5 module validation with tool is autoReasoningTool', async ({ page }) => {
+  test('TC_05 - Verify validation with tool is autoReasoningTool', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
     await toolValidationpageObject.handleCustomCheckpoint();
     await toolValidationpageObject.runautoReasoningToolAndVerify('Ingest all the tasks for Tejashwini', 'Tejashwini', 3);
   });
-  test('TC_06 - Verify GPT-5 module Space/List/Folder selection (Checkbox and Uncheckbox)', async ({ page }) => {
+  test('TC_06 - Verify Space/List/Folder selection (Checkbox and Uncheckbox)', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
 
@@ -97,7 +97,7 @@ test.describe('FW Tests', () => {
     });
   });
 
-  test('TC_09 - Verify GPT-5 module Accepts and uses: PDF (text), PDF (scan/OCR), PNG/JPG, CSV/XLSX ≤50 MB; - 7 file formats', async ({ page }) => {
+  test('TC_09 - Verify module Accepts and uses: PDF (text), PDF (scan/OCR), PNG/JPG, CSV/XLSX ≤50 MB; - 7 file formats', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModule('gemini-2.5-pro');
 
@@ -166,19 +166,19 @@ test.describe('FW Tests', () => {
 
     console.log('✅ TC_13 Passed: Simple collapsible checkbox validation completed');
   });
-  test('TC_13 - Verify GPT-5 module validation with tool is driveSearchTool', async ({ page }) => {
+  test('TC_13 - Verify validation with tool is driveSearchTool', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
     await toolValidationpageObject.runGoogleDriveSearchAndVerify('Can you read the document "Playwright: An Overview" from Google Drive?', 'Playwright', 3);
   });
 
-  test('TC_14 - Verify GPT-5 module validation with tool is driveSearchTool using Google Docs URL', async ({ page }) => {
+  test('TC_14 - Verify validation with tool is driveSearchTool using Google Docs URL', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
     await toolValidationpageObject.runGoogleDriveSearchAndVerify('https://docs.google.com/document/d/1AFh5P-A04PMyX0LMwdxmMGLi_sKuQ6ze/edit#heading=h.jpyal7cu2z9b', 'document', 3);
   });
 
-  test('TC_15 - Verify GPT-5 module validation with Google Docs URL without checkbox selection', async ({ page }) => {
+  test('TC_15 - Verify validation with Google Docs URL without checkbox selection', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
 
@@ -204,7 +204,7 @@ test.describe('FW Tests', () => {
     await toolValidationpageObject.runCanvasModeCompleteWorkflow(3);
   });
 
-  test('TC_17 - Verify GPT-5 module validation with Databricks Business Intelligence tool', async ({ page }) => {
+  test('TC_17 - Verify validation with Databricks Business Intelligence tool', async ({ page }) => {
     const toolValidationpageObject = new toolValidationPages(page);
     await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
     await toolValidationpageObject.runDatabricksAndVerify('Can I get my last week tasks?', 'tasks', 5);
