@@ -1507,7 +1507,7 @@ export class toolValidationPages {
                 await this.page.waitForTimeout(2000);
                 
                 await this.messageBox.waitFor({ state: 'visible' });
-                await this.messageBox.fill('Can you create a document about Chennai without asking any further more questions?');
+                await this.messageBox.fill('Can you create a document about Chennai without asking any further questions?');
                 await this.messageSend.click();
                 
                 // Wait for assistant response
