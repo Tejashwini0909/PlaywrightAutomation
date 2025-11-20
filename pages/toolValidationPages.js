@@ -1307,16 +1307,50 @@ export class toolValidationPages {
      * @param {string|Array<string>} expectedTools - Expected tool name(s) to verify
      */
     async verifyCanvasModeTool(expectedTools) {
-        await this.toolUsedName.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
-        const toolUsedText = await this.toolUsedName.textContent();
+        // Find all tool used elements
+        const allToolElements = this.page.locator("//div[text() = 'Tool used: ']");
+        
+        // Wait for at least one tool element to appear with retry
+        try {
+            await this.page.waitForSelector("//div[text() = 'Tool used: ']", { 
+                state: 'visible', 
+                timeout: TimeoutConfig.LONG_TIMEOUT 
+            });
+        } catch (error) {
+            console.log('⚠️ No tool elements found after waiting');
+            throw new Error('No "Tool used:" elements found on the page');
+        }
+        
+        // Get all tool texts
+        const toolCount = await allToolElements.count();
+        console.log(`🔧 Found ${toolCount} tool usage(s), checking all...`);
+        
+        const allToolTexts = [];
+        for (let i = 0; i < toolCount; i++) {
+            const toolText = await allToolElements.nth(i).textContent();
+            allToolTexts.push(toolText);
+            console.log(`   Tool ${i + 1}: "${toolText}"`);
+        }
         
         // Support both single string and array of strings
         const toolsToCheck = Array.isArray(expectedTools) ? expectedTools : [expectedTools];
         
-        const hasMatch = toolsToCheck.some(tool => toolUsedText.includes(tool));
-        expect(hasMatch, `Expected tool to contain one of [${toolsToCheck.join(', ')}] but got: "${toolUsedText}"`).toBeTruthy();
+        // Check if any of the tool texts contains any of the expected tools
+        const matchFound = allToolTexts.some(toolText => 
+            toolsToCheck.some(expectedTool => toolText.includes(expectedTool))
+        );
         
-        console.log(` Tool verified: ${toolUsedText}`);
+        if (!matchFound) {
+            const allToolsString = allToolTexts.join(', ');
+            throw new Error(`Expected tool to contain one of [${toolsToCheck.join(', ')}] but found: ${allToolsString}`);
+        }
+        
+        // Find which tool matched
+        const matchedTool = allToolTexts.find(toolText => 
+            toolsToCheck.some(expectedTool => toolText.includes(expectedTool))
+        );
+        
+        console.log(`✅ Tool verified: ${matchedTool}`);
     }
 
     /**
@@ -1468,7 +1502,7 @@ export class toolValidationPages {
                 console.log('📝 Starting Canvas Mode Complete Workflow...');
 
                 // Step 1: Create Document
-                console.log('Step 1: Creating document...');
+                console.log('Step 1: Creating document about Chennai...');
                 await this.selectCanvasModeToolSetting();
                 await this.page.waitForTimeout(2000);
                 
@@ -1476,83 +1510,76 @@ export class toolValidationPages {
                 await this.messageBox.fill('Can you create a document about Chennai?');
                 await this.messageSend.click();
                 
-                // Wait for thinking to disappear
-                try {
-                    await this.thinkingTxt.waitFor({ state: 'visible', timeout: 5000 });
-                    await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
-                } catch (e) {
-                    console.log('⚠️ Thinking text not found, continuing...');
-                }
-                await this.page.waitForTimeout(10000);
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(5000);
                 
-                // Verify create response - more flexible
+                // Verify expected answer contains "Chennai" related content
                 await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
-                let responseTexts = await this.assistantContainer.locator('h1, h2, p, li, div').allTextContents();
+                let responseTexts = await this.assistantContainer.locator('h1, h2, p, li').allTextContents();
                 let fullResponse = responseTexts.join(' ').trim();
                 console.log(`📄 Create Response Preview: ${fullResponse.substring(0, 150)}...`);
                 
-                // Check if response has meaningful content
-                if (fullResponse.length > 10) {
-                    console.log('✅ Step 1: Document created successfully (response received)');
-                } else {
-                    throw new Error('Create document response is empty or too short');
-                }
+                const expectedCreateWords = ['chennai', 'document', 'created'];
+                const createResponseLower = fullResponse.toLowerCase();
+                const hasCreateMatch = expectedCreateWords.some(word => createResponseLower.includes(word));
+                expect(hasCreateMatch, `Expected create response to contain words from "${expectedCreateWords.join(', ')}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+                
+                // Verify 'createDocument' tool used
+                await this.verifyCanvasModeTool('createDocument');
+                console.log('✅ Step 1: Document created and verified');
 
                 // Step 2: Update Document
-                console.log('Step 2: Updating document...');
+                console.log('Step 2: Updating document by removing introduction...');
                 await this.page.waitForTimeout(2000);
                 await this.messageBox.waitFor({ state: 'visible' });
-                await this.messageBox.fill('Can you update the document by removing the introduction?');
+                await this.messageBox.fill('Can you remove History from the above document and update the document?');
                 await this.messageSend.click();
                 
-                // Wait for thinking to disappear
-                try {
-                    await this.thinkingTxt.waitFor({ state: 'visible', timeout: 5000 });
-                    await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
-                } catch (e) {
-                    console.log('⚠️ Thinking text not found, continuing...');
-                }
-                await this.page.waitForTimeout(10000);
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(50000);
                 
-                // Verify update response - more flexible
+                // Verify expected answer contains "update" related content
                 await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
-                responseTexts = await this.assistantContainer.locator('h1, h2, p, li, div').allTextContents();
+                responseTexts = await this.assistantContainer.locator('h1, h2, p, li').allTextContents();
                 fullResponse = responseTexts.join(' ').trim();
                 console.log(`📝 Update Response Preview: ${fullResponse.substring(0, 150)}...`);
                 
-                if (fullResponse.length > 10) {
-                    console.log('✅ Step 2: Document updated successfully (response received)');
-                } else {
-                    throw new Error('Update document response is empty or too short');
-                }
+                const expectedUpdateWords = ['update', 'remove', 'History'];
+                const updateResponseLower = fullResponse.toLowerCase();
+                const hasUpdateMatch = expectedUpdateWords.some(word => updateResponseLower.includes(word));
+                expect(hasUpdateMatch, `Expected update response to contain words from "${expectedUpdateWords.join(', ')}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+                
+                // Verify 'updateDocument' tool used
+                await this.verifyCanvasModeTool('updateDocument');
+                console.log('✅ Step 2: Document updated and verified');
 
                 // Step 3: Get Document
-                console.log('Step 3: Getting document...');
+                console.log('Step 3: Getting conclusion from document...');
                 await this.page.waitForTimeout(2000);
                 await this.messageBox.waitFor({ state: 'visible' });
-                await this.messageBox.fill('Can I get the conclusion from the document?');
+                await this.messageBox.fill('Can I get the conclusion from the above document?');
                 await this.messageSend.click();
                 
-                // Wait for thinking to disappear
-                try {
-                    await this.thinkingTxt.waitFor({ state: 'visible', timeout: 5000 });
-                    await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
-                } catch (e) {
-                    console.log('⚠️ Thinking text not found, continuing...');
-                }
-                await this.page.waitForTimeout(10000);
+                // Wait for assistant response
+                await this.thinkingTxt.waitFor({ state: 'hidden', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.page.waitForTimeout(50000);
                 
-                // Verify get response - more flexible
+                // Verify expected answer contains "conclusion" related content
                 await this.waitAssistantContainer.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
-                responseTexts = await this.assistantContainer.locator('h1, h2, p, li, div').allTextContents();
+                responseTexts = await this.assistantContainer.locator('h1, h2, p, li').allTextContents();
                 fullResponse = responseTexts.join(' ').trim();
                 console.log(`📋 Get Response Preview: ${fullResponse.substring(0, 150)}...`);
                 
-                if (fullResponse.length > 10) {
-                    console.log('✅ Step 3: Document retrieved successfully (response received)');
-                } else {
-                    throw new Error('Get document response is empty or too short');
-                }
+                const expectedGetWords = ['conclusion', 'document'];
+                const getResponseLower = fullResponse.toLowerCase();
+                const hasGetMatch = expectedGetWords.some(word => getResponseLower.includes(word));
+                expect(hasGetMatch, `Expected get response to contain words from "${expectedGetWords.join(', ')}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+                
+                // Verify 'getDocument' tool used
+                await this.verifyCanvasModeTool('getDocument');
+                console.log('✅ Step 3: Document retrieved and verified');
 
                 console.log('✅ Canvas Mode Complete Workflow finished successfully!');
                 return; // Success
