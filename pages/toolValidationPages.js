@@ -227,7 +227,7 @@ export class toolValidationPages {
         await this.futureWorksChkbox.waitFor({ state: 'visible' });
         await this.futureWorksChkbox.click();
     }
-     async selectModuleWithoutFutureWorks(moduleName) {
+     async selectModuleWithOutFutureCheckbox(moduleName) {
         // Click the dropdown button
         await this.page.waitForTimeout(4000);
         await this.moduleDrpDown.waitFor({ state: 'visible' });
