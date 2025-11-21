@@ -209,6 +209,11 @@ test.describe('FW Tests', () => {
     await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
     await toolValidationpageObject.runDatabricksAndVerify('Can I get my last week tasks?', 'tasks', 5);
   });
+test('TC_18 - Verify SOP Goal', async ({ page }) => {
+    const toolValidationpageObject = new toolValidationPages(page);
+    await toolValidationpageObject.selectModuleWithOutFutureCheckbox('gemini-2.5-pro');
+    await toolValidationpageObject.verifySopGoalWorkflow(1);
+  });
 
 });
 
