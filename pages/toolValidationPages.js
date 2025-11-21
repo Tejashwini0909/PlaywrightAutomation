@@ -57,6 +57,11 @@ export class toolValidationPages {
         this.DatabricksCheckbox = page.locator("//label[text() = 'Databricks Business Intelligence']//parent::div//following-sibling::button");
         this.CanvasModeCheckbox = page.locator("//label[text() = 'Canvas Mode']//parent::div//following-sibling::button");
         this.CUDirectIngestionCheckbox = page.locator("//label[text() = 'CU Direct Ingestion']//parent::div//following-sibling::button");
+        
+        // SOP Goal locators
+        this.deliveryCsatSectionCheckbox = page.locator("(//span[text() = '[SVD] Delivery & CSat'])[last()]//parent::button//following-sibling::button");
+        this.objectivesDropdown = page.locator("//div[text() = 'Objectives']//parent::div//button");
+        this.sopGoalOption = page.locator("(//span[text() = 'Sop-Goal'])[last()]");
 
     }
 
@@ -275,6 +280,52 @@ export class toolValidationPages {
         // Check if at least one word from expected answer is in the response
         const hasMatch = expectedWords.some(word => responseLower.includes(word));
         expect(hasMatch, `Expected response to contain words from "${expectedAnswer}" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+    }
+
+    /**
+     * Polls the assistant container for a specific keyword until timeout.
+     * Returns the full response string when the keyword is found.
+     * @param {string} keyword
+     * @param {number} timeoutMs
+     */
+    async waitForAssistantResponseContains(keyword, timeoutMs = TimeoutConfig.LONG_TIMEOUT) {
+        const pollInterval = 3000; // ms
+        const deadline = Date.now() + timeoutMs;
+
+        console.log(`⏳ Waiting up to ${timeoutMs}ms for assistant response containing "${keyword}"`);
+
+        while (Date.now() < deadline) {
+            // Give a small breathing room for UI updates
+            await this.page.waitForTimeout(1000);
+
+            // If the thinking indicator is visible, wait a bit and continue polling
+            const thinkingVisible = await this.thinkingTxt.isVisible().catch(() => false);
+            if (thinkingVisible) {
+                console.log('🤖 Assistant still thinking...');
+                await this.page.waitForTimeout(pollInterval);
+                continue;
+            }
+
+            // Read available assistant text nodes
+            const responseTexts = await this.assistantContainer.locator('h1, h2, p, li').allTextContents().catch(() => []);
+            const fullResponse = responseTexts.join(' ').trim();
+
+            if (fullResponse.length > 0) {
+                console.log(`📝 Assistant responded (${fullResponse.length} chars)`);
+                if (fullResponse.toLowerCase().includes(keyword.toLowerCase())) {
+                    console.log(`✅ Found keyword "${keyword}" in assistant response`);
+                    return fullResponse;
+                }
+                // If there's a response but keyword not present yet, continue polling until timeout
+                console.log(` Keyword not found yet. Preview: ${fullResponse.substring(0, 120)}...`);
+            } else {
+                console.log('No assistant response content yet');
+            }
+
+            await this.page.waitForTimeout(pollInterval);
+        }
+
+        throw new Error(`Timed out after ${timeoutMs}ms waiting for assistant response containing "${keyword}"`);
     }
     async uncheckCheckboxIfNotChecked()
     {
@@ -1102,6 +1153,71 @@ export class toolValidationPages {
     }
 
     /**
+     * Verify SOP Goal workflow - Select Delivery & CSat checkbox, expand Objectives dropdown, 
+     * select Sop-Goal, send message and verify response contains "Databricks"
+     * @param {number} retries - Number of retry attempts (default 3)
+     */
+    async verifySopGoalWorkflow(retries = 3) {
+        let lastError;
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                console.log('🎯 Starting SOP Goal workflow...');
+                
+                // Step 1: Click on [SVD] Delivery & CSat checkbox
+                await this.deliveryCsatSectionCheckbox.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.deliveryCsatSectionCheckbox.click();
+                await this.page.waitForTimeout(2000);
+                console.log('✅ Clicked on [SVD] Delivery & CSat checkbox');
+
+                // Step 2: Click on Objectives dropdown
+                await this.objectivesDropdown.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.objectivesDropdown.click();
+                await this.page.waitForTimeout(1000);
+                console.log('✅ Clicked on Objectives dropdown');
+
+                // Step 3: Click on Sop-Goal option
+                await this.sopGoalOption.waitFor({ state: 'visible', timeout: TimeoutConfig.LONG_TIMEOUT });
+                await this.sopGoalOption.click();
+                await this.page.waitForTimeout(2000);
+                console.log('✅ Selected Sop-Goal option');
+
+                // Step 4: Send message
+                const message = 'Create Databricks SOP, use databrickes design document as reference';
+                await this.messageBox.waitFor({ state: 'visible' });
+                await this.messageBox.fill(message);
+                await this.messageSend.click();
+                console.log('✅ Sent message:', message);
+
+                // Step 5: Wait (poll) for assistant response to contain the expected keyword
+                const waitTimeout = Math.max(TimeoutConfig.LONG_TIMEOUT, 5 * 60 * 1000); // at least 5 minutes
+                const fullResponse = await this.waitForAssistantResponseContains('databricks', waitTimeout);
+
+                console.log(`📝 Response length: ${fullResponse.length} characters`);
+                console.log(`📝 Response preview: ${fullResponse.substring(0, 200)}...`);
+
+                // Check if response contains "Databricks" (case-insensitive)
+                const responseLower = fullResponse.toLowerCase();
+                const hasMatch = responseLower.includes('databricks');
+
+                expect(hasMatch, `Expected response to contain "Databricks" but got: "${fullResponse.substring(0, 200)}..."`).toBeTruthy();
+                
+                console.log('✅ SOP Goal workflow completed successfully!');
+                return; // Success
+                
+            } catch (error) {
+                lastError = error;
+                if (attempt < retries) {
+                    console.log(`⚠️ Attempt ${attempt} failed, refreshing page and retrying...`);
+                    console.log(`Error: ${error.message}`);
+                    await this.page.reload();
+                    await this.page.waitForTimeout(3000); // Wait for page to load after refresh
+                }
+            }
+        }
+        throw lastError; // If all retries fail, throw the last error
+    }
+
+    /**
      * Select Google Drive tool setting
      */
     async selectGoogleDriveToolSetting() {
@@ -1507,7 +1623,7 @@ export class toolValidationPages {
                 await this.page.waitForTimeout(2000);
                 
                 await this.messageBox.waitFor({ state: 'visible' });
-                await this.messageBox.fill('Can you create a document about Chennai without asking any further more questions?');
+                await this.messageBox.fill('Can you create a document about Chennai?');
                 await this.messageSend.click();
                 
                 // Wait for assistant response
