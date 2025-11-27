@@ -24,9 +24,16 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.event.workflow_run.repository.full_name }}
           run-id: ${{ github.event.workflow_run.id }}
           path: artifacts
           merge-multiple: true
+
+      - name: List downloaded files
+        run: |
+          echo "Artifacts directory contents:"
+          ls -R artifacts || true
 
       - name: Locate junit file
         id: locate-junit
