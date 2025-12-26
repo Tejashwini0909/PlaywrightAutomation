@@ -1,0 +1,61 @@
+name: n8n Workflow Settings Test 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run n8n Workflow Settings test
+        run: npx playwright test tests/ToolValidation/n8nWorkflowSettings.spec.js
+        env:
+          LOGIN_METHOD: session
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: 'n8n Workflow Settings Test Results'
+          path: 'test-results/junit-report.xml'
+          reporter: java-junit
+          fail-on-error: false
+          max-annotations: 20
+          token: ${{ github.token }}
+      - name: Upload Playwright HTML Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: n8n-workflow-settings-html-report
+          path: playwright-report/
+          retention-days: 7
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: n8n-workflow-settings-screenshots
+          path: test-results/**/*.png
+          retention-days: 7
+      - name: Upload Videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: n8n-workflow-settings-videos
+          path: test-results/**/*.webm
+          retention-days: 7
+      - name: Upload JUnit XML
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: n8n-workflow-settings-junit-report
+          path: test-results/junit-report.xml
+          retention-days: 7
